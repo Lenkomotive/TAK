@@ -8,5 +8,6 @@ public class Main {
         GameState state = GameState.getDummyGameState3x3();
         Tree tree = MinMax.constructTree(state);
         Action action = MinMax.alphaBetaPrune(tree);
+        System.out.println("baki is gay");
     }
 }
