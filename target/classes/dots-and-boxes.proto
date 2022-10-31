@@ -1,0 +1,25 @@
+// Author: Martin Wistauder
+// Version: 1.0
+// Date: 11.12.2019
+syntax = "proto3";
+package dab;
+
+// dots-and-boxes implementation
+
+message GameParameter {
+	uint32 number_of_vertical_columns = 1;
+	uint32 number_of_horizontal_columns = 2;
+}
+
+message GameTurn {
+	bool vertical = 1;
+	uint32 target_column = 2;
+	uint32 target_gap = 3;
+}
+
+message GameState {
+	uint32 vertical_columns = 1;
+	uint32 horizontal_columns = 2;
+	bytes vertical_lines = 3;
+	bytes horizontal_lines = 4;
+}

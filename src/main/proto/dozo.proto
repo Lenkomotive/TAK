@@ -1,0 +1,61 @@
+// Author: Martin Wistauder
+// Version: 1.0
+// Date: 02.10.2021
+syntax = "proto3";
+package dzo;
+
+// -----------------------------------------
+// Dozo network protocol implementation
+// -----------------------------------------
+
+// General Information:
+// - GameToken: dzo
+
+// The GameParameter packet defines the board length and number of colors used.
+message GameParameter {
+  uint32 board_length = 1; // The length of one side of the triangular board.
+  uint32 number_of_colors = 2; // The number of available colors.
+  // Has to be a factor of the board size (Hint: size = n * (n+1) / 2), where n is the board length.
+}
+
+// The GameTurn packet defines the position and color of the placed stone.
+// The first color is indexed 0.
+// The top of the triangular board is indexed (x|y) = (0|0).
+//
+// Example:
+//        (0|0)
+//     (0|1),(1|1)
+//   (0|2),(1|2),(2|2)
+// (0|3),(1|3),(2|3),(3|3)
+//
+// Hint: The indexing of the triangular board matches a 2d-array with some invalid fields.
+message GameTurn {
+  uint32 x = 1; // Position, X-axis coordinate.
+  uint32 y = 2; // Position, Y-axis coordinate.
+  uint32 color = 3; // Color of the stone.
+}
+
+// The GameState packet defines the current board state of the match.
+message GameState {
+  uint32 board_length = 1; // The length of one side of the triangular board.
+  uint32 number_of_colors = 2; // The number of available colors.
+  // The board_data byte array contains only the triangular board.
+  // Each byte contains the color of this position, or 0xFF if the position is unoccupied.
+  //
+  // Example:
+  //        (0|0)
+  //     (0|1),(1|1)
+  // board_data = { color(0|0), color(0|1), color(1|1) }
+  //
+  // Hint: If you want to use a 2d-array for your client, here is an example of how to read the data nicely.
+  //
+  //  for (size_t y = 0; y < length; ++y)
+  //  {
+  //    for (size_t x = 0; x <= y; ++x)
+  //    {
+  //      client_data[y][x] = gamestate_board_data[x + y * (y + 1) / 2];
+  //    }
+  //  }
+  bytes board_data = 3;
+  repeated uint32 remaining_stones = 4; // The remaining stones for each color.
+}

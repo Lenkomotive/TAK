@@ -1,0 +1,21 @@
+// Author: Martin Wistauder
+// Version: 1.0
+// Date: 11.12.2019
+syntax = "proto3";
+package nim;
+
+// nim implementation
+
+message GameParameter {
+	uint32 number_of_columns = 1;
+	uint32 number_of_stones = 2;
+}
+
+message GameTurn {
+	uint32 target_column = 1;
+	uint32 number_to_take = 2;
+}
+
+message GameState {
+	string columns = 1; // height of columns, whitespace separated
+}

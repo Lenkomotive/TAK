@@ -1,0 +1,39 @@
+// Author: Martin Wistauder
+// Version: 1.0
+// Date: 05.10.2020
+syntax = "proto3";
+package dom;
+
+// -----------------------------------------
+// Dominect network protocol implementation
+// -----------------------------------------
+
+// The GameParameter packet defines the board of m x n fields (width x height).
+message GameParameter {
+    uint32 board_width = 1; // The width defines left and right edges for the first player.
+    uint32 board_height = 2; // The height defines top and bottom edges for the second player.
+}
+
+// The GameTurn packet defines the two occupied positions of the played domino piece.
+// These positions should be adjacent (a valid domino piece), otherwise the server will respond with an invalid turn status.
+message GameTurn {
+    uint32 x1 = 1; // 1. Position, X-axis coordinate.
+    uint32 y1 = 2; // 1. Position, Y-axis coordinate.
+    uint32 x2 = 3; // 2. Position, X-axis coordinate.
+    uint32 y2 = 4; // 2. Position, Y-axis coordinate.
+}
+
+// The GameState packet defines the current board state of the match.
+message GameState {
+    uint32 board_width = 1; // The used board width.
+    uint32 board_height = 2; // The used board height.
+    // Byte array containing the current board information.
+    // Each byte/character corresponds to a field state.
+    // Ascii '0' ... Field unoccupied.
+    // Ascii '1' ... Field belongs to the first player.
+    // Ascii '2' ... Field belongs to the second player.
+    // The overlying GameState packet defines "beginning_player", which is set to true, if you are the first player.
+    // Fields are ordered row-after-row inside the byte array "board_data".
+    // The first field of "board_data" corresponds to the position (x|y)->(0|0), the second to (x|y)->(1|0).
+    bytes board_data = 3;
+}
