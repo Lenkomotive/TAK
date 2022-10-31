@@ -21,6 +21,7 @@ public class Main {
 
     private static String matchToken;
     private static boolean beginningPlayer;
+
     public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure(); //log4j
         client = new Client();
@@ -30,6 +31,7 @@ public class Main {
         checkAgreedTimeout();
         gameLoop();
     }
+
     private static void createMatch() {
         Netcode.MatchRequest request = client.createMatchRequest(BOARD_LENGTH, USER_TOKEN, GAME_TOKEN, TIMEOUT);
         Netcode.MatchResponse response = client.requestNewMatch(request);
@@ -38,6 +40,7 @@ public class Main {
         logger.info("Match token: " + matchToken);
         logger.info("Beginning player: " + beginningPlayer);
     }
+
     private static void waitForMatchToStart() throws InterruptedException {
         while(queryGameState().getGameStatus() == Netcode.GameStatus.MATCH_NOT_STARTED) {
             logger.info("Waiting for match to begin...");
@@ -45,6 +48,7 @@ public class Main {
         }
         logger.info("Match starts!");
     }
+
     private static void checkOpponentInfo() {
         Netcode.MatchIDPacket matchIDPacket = client.createMatchIdPacket(USER_TOKEN, matchToken);
         Netcode.OpponentInfoResponse opponentInfoResponse = client.getOpponentInfo(matchIDPacket);
@@ -53,6 +57,7 @@ public class Main {
                 + ", with a ELO value of: "
                 + opponentInfoResponse.getElo().getGroupElo());
     }
+
     private static void checkAgreedTimeout() {
         Netcode.MatchIDPacket matchIDPacket = client.createMatchIdPacket(USER_TOKEN, matchToken);
         logger.info("Agreed timeout: " + client.getTimeout(matchIDPacket));
@@ -70,20 +75,23 @@ public class Main {
             logger.info("Board length: " + state.getBoardLength());
             logger.info("Capstones: " + state.getRemainingCapstonesList());
             logger.info("Remaining stones: " + state.getRemainingStonesList());
+            //TODO calculate our turn!
             Tree tree = MinMax.constructTree(state);
             Tak.PlaceAction action = MinMax.alphaBetaPrune(tree);
-            //TODO calculate our turn!
             logger.info("\n");
         }
     }
+
     private static boolean matchIsRunning() {
         Netcode.GameStatus status = queryGameState().getGameStatus();
         return (status == Netcode.GameStatus.YOUR_TURN) || (status == Netcode.GameStatus.OPPONENTS_TURN);
     }
+
     private static boolean itIsOpponentsTurn() {
         Netcode.GameStatus status = queryGameState().getGameStatus();
         return status == Netcode.GameStatus.OPPONENTS_TURN;
     }
+
     private static Netcode.GameStateResponse queryGameState() {
         Netcode.MatchIDPacket matchIDPacket = client.createMatchIdPacket(USER_TOKEN, matchToken);
         return client.getGameState(matchIDPacket);
