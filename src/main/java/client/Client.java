@@ -10,6 +10,7 @@ import tak.Tak;
 
 public class Client {
     private static final Logger logger = LogManager.getLogger(Client.class);
+
     private final String HOST = "gameserver.ist.tugraz.at";
     private final int PORT = 80;
 
@@ -22,9 +23,28 @@ public class Client {
                 .build();
         stub = GameComGrpc.newBlockingStub(channel);
     }
-
+    public Netcode.MatchResponse requestNewMatch(Netcode.MatchRequest request) {
+        logger.info("New Match requested");
+        return stub.newMatch(request);
+    }
+    public Netcode.TurnResponse submitTurn(Netcode.TurnRequest turnRequest) {
+        logger.info("Turn submitted");
+        return stub.submitTurn(turnRequest);
+    }
+    public Netcode.GameStateResponse getGameState(Netcode.MatchIDPacket matchIDPacket) {
+        return stub.getGameState(matchIDPacket);
+    }
+    public int getTimeout(Netcode.MatchIDPacket matchIDPacket) {
+        return stub.getTimeout(matchIDPacket).getTimeoutSeconds();
+    }
+    public Netcode.OpponentInfoResponse getOpponentInfo(Netcode.MatchIDPacket matchIDPacket) {
+        return stub.getOpponentInfo(matchIDPacket);
+    }
+    public Netcode.EloValues getEloValues(Netcode.IDPacket idPacket) {
+        return stub.getElo(idPacket);
+    }
     public Netcode.MatchRequest createMatchRequest(int boardLength, String userToken, String gameToken, int timeout) {
-        Tak.GameParameter gameParameter = createGameParameter(boardLength);
+        Tak.GameParameter gameParameter = Tak.GameParameter.newBuilder().setBoardLength(boardLength).build();
         Netcode.MatchRequest.Builder matchRequestBuilder = Netcode.MatchRequest.newBuilder();
         return matchRequestBuilder
                 .setUserToken(userToken)
@@ -33,34 +53,22 @@ public class Client {
                 .setTakGameParameters(gameParameter)
                 .build();
     }
-
-    public Netcode.MatchResponse requestNewMatch(Netcode.MatchRequest request) {
-        return stub.newMatch(request);
+    public Netcode.TurnRequest createTurnRequest(Netcode.MatchIDPacket matchIDPacket, Tak.GameTurn gameTurn) {
+        return  Netcode.TurnRequest.newBuilder()
+                .setMatchId(matchIDPacket)
+                .setTakGameTurn(gameTurn)
+                .build();
     }
-
     public Netcode.MatchIDPacket createMatchIdPacket(String userToken, String matchToken){
         return Netcode.MatchIDPacket.newBuilder()
                 .setUserToken(userToken)
                 .setMatchToken(matchToken)
                 .build();
     }
-
-    public Netcode.OpponentInfoResponse getOpponentInfo(Netcode.MatchIDPacket matchIDPacket) {
-        return stub.getOpponentInfo(matchIDPacket);
+    public Netcode.IDPacket createIDPacket(String userToken) {
+        return Netcode.IDPacket.newBuilder()
+                .setUserToken(userToken)
+                .build();
     }
-
-    public Netcode.GameStatus getGameStatus(Netcode.MatchIDPacket matchIDPacket) {
-        return stub.getGameState(matchIDPacket).getGameStatus();
-    }
-
-    public int getAgreedTimeout(Netcode.MatchIDPacket matchIDPacket) {
-        return stub.getTimeout(matchIDPacket).getTimeoutSeconds();
-    }
-
-    private Tak.GameParameter createGameParameter(int boardLength) {
-        Tak.GameParameter.Builder gameParameterBuilder = Tak.GameParameter.newBuilder();
-        return gameParameterBuilder.setBoardLength(boardLength).build();
-    }
-
 
 }
