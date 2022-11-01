@@ -1,5 +1,4 @@
 import algorithm.MinMax;
-import algorithm.Tree;
 import client.Client;
 import netcode.Netcode;
 import org.apache.log4j.BasicConfigurator;
@@ -12,46 +11,52 @@ import static java.lang.Thread.sleep;
 public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
 
+    private static int SLEEP_MS = 1000;
+
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 3;
-    private static final int TIMEOUT = 69;
+    private static int BOARD_LENGTH = 8;
+    private static final int TIMEOUT = 10;
 
     private static Client client;
 
-    private static String matchToken;
     private static boolean beginningPlayer;
 
     public static void main(String[] args) throws InterruptedException {
-        BasicConfigurator.configure(); //log4j
+        BasicConfigurator.configure(); //
         client = new Client();
-        createMatch();
-        waitForMatchToStart();
-        checkOpponentInfo();
-        checkAgreedTimeout();
-        gameLoop();
+        while(true) {
+            createMatch();
+            waitForMatchToStart();
+            checkOpponentInfo();
+            checkAgreedTimeout();
+            gameLoop();
+        }
     }
 
     private static void createMatch() {
-        Netcode.MatchRequest request = client.createMatchRequest(BOARD_LENGTH, USER_TOKEN, GAME_TOKEN, TIMEOUT);
-        Netcode.MatchResponse response = client.requestNewMatch(request);
-        matchToken = response.getMatchToken();
+        Netcode.MatchResponse response = client.createMatchRequest(BOARD_LENGTH, USER_TOKEN, GAME_TOKEN, TIMEOUT);
         beginningPlayer = response.getBeginningPlayer();
-        logger.info("Match token: " + matchToken);
         logger.info("Beginning player: " + beginningPlayer);
+
+        String matchToken = response.getMatchToken();
+        logger.info("Match token: " + matchToken);
+        client.initMatchIDPacket(USER_TOKEN, matchToken);
+
+        int boardLength = client.getGameState().getTakGameState().getBoardLength();
+        logger.info("Playing on a " + boardLength+ "x" + boardLength + " Board");
     }
 
     private static void waitForMatchToStart() throws InterruptedException {
-        while(queryGameState().getGameStatus() == Netcode.GameStatus.MATCH_NOT_STARTED) {
+        while(client.getGameState().getGameStatus() == Netcode.GameStatus.MATCH_NOT_STARTED) {
             logger.info("Waiting for match to begin...");
-            sleep(1000);
+            sleep(SLEEP_MS);
         }
         logger.info("Match starts!");
     }
 
     private static void checkOpponentInfo() {
-        Netcode.MatchIDPacket matchIDPacket = client.createMatchIdPacket(USER_TOKEN, matchToken);
-        Netcode.OpponentInfoResponse opponentInfoResponse = client.getOpponentInfo(matchIDPacket);
+        Netcode.OpponentInfoResponse opponentInfoResponse = client.getOpponentInfo();
         logger.info("We are playing against: "
                 + opponentInfoResponse.getGroupPseudonym()
                 + ", with a ELO value of: "
@@ -59,41 +64,41 @@ public class Main {
     }
 
     private static void checkAgreedTimeout() {
-        Netcode.MatchIDPacket matchIDPacket = client.createMatchIdPacket(USER_TOKEN, matchToken);
-        logger.info("Agreed timeout: " + client.getTimeout(matchIDPacket));
+        logger.info("Agreed timeout: " + client.getTimeout());
     }
 
     private static void gameLoop() throws InterruptedException {
         while(matchIsRunning()) {
             if(itIsOpponentsTurn()) {
                 logger.info("Opponents turn, let's wait...");
-                sleep(1000);
+                sleep(SLEEP_MS);
                 continue;
             }
-            logger.info("Our turn!");
-            Tak.GameState state = queryGameState().getTakGameState();
-            logger.info("Board length: " + state.getBoardLength());
-            logger.info("Capstones: " + state.getRemainingCapstonesList());
-            logger.info("Remaining stones: " + state.getRemainingStonesList());
-            //TODO calculate our turn!
-            Tree tree = MinMax.constructTree(state);
-            Tak.PlaceAction action = MinMax.alphaBetaPrune(tree);
-            logger.info("\n");
+            Tak.GameState state = client.getGameState().getTakGameState();
+            Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
+            playTurn(turn);
         }
+        logger.info("Match endend with status: " + client.getGameState().getGameStatus());
+        logger.info("-----------------------------------------------------------------");
     }
 
     private static boolean matchIsRunning() {
-        Netcode.GameStatus status = queryGameState().getGameStatus();
+        Netcode.GameStatus status = client.getGameState().getGameStatus();
         return (status == Netcode.GameStatus.YOUR_TURN) || (status == Netcode.GameStatus.OPPONENTS_TURN);
     }
 
     private static boolean itIsOpponentsTurn() {
-        Netcode.GameStatus status = queryGameState().getGameStatus();
+        Netcode.GameStatus status = client.getGameState().getGameStatus();
         return status == Netcode.GameStatus.OPPONENTS_TURN;
     }
 
-    private static Netcode.GameStateResponse queryGameState() {
-        Netcode.MatchIDPacket matchIDPacket = client.createMatchIdPacket(USER_TOKEN, matchToken);
-        return client.getGameState(matchIDPacket);
+    private static void playTurn(Tak.GameTurn turn) {
+        Netcode.TurnResponse response = client.submitTurn(turn);
+        switch (response.getTurnStatus()) {
+            case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
+            case NOT_YOUR_TURN -> logger.error("It was not our Turn!");
+            case INVALID_TURN -> logger.error("Invalid Turn played!");
+            case MATCH_OVER -> logger.info("Match is over!");
+        }
     }
 }

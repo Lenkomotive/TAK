@@ -17,6 +17,8 @@ public class Client {
     private final ManagedChannel channel;
     private final GameComGrpc.GameComBlockingStub stub;
 
+    private Netcode.MatchIDPacket matchIDPacket;
+
     public Client() {
         channel = ManagedChannelBuilder.forAddress(HOST, PORT)
                 .usePlaintext()
@@ -24,60 +26,57 @@ public class Client {
         stub = GameComGrpc.newBlockingStub(channel);
     }
 
-    public Netcode.MatchResponse requestNewMatch(Netcode.MatchRequest request) {
-        logger.info("New Match requested");
-        return stub.newMatch(request);
-    }
-
-    public Netcode.TurnResponse submitTurn(Netcode.TurnRequest turnRequest) {
-        logger.info("Turn submitted");
-        return stub.submitTurn(turnRequest);
-    }
-
-    public Netcode.GameStateResponse getGameState(Netcode.MatchIDPacket matchIDPacket) {
-        return stub.getGameState(matchIDPacket);
-    }
-
-    public int getTimeout(Netcode.MatchIDPacket matchIDPacket) {
-        return stub.getTimeout(matchIDPacket).getTimeoutSeconds();
-    }
-
-    public Netcode.OpponentInfoResponse getOpponentInfo(Netcode.MatchIDPacket matchIDPacket) {
-        return stub.getOpponentInfo(matchIDPacket);
-    }
-
-    public Netcode.EloValues getEloValues(Netcode.IDPacket idPacket) {
-        return stub.getElo(idPacket);
-    }
-
-    public Netcode.MatchRequest createMatchRequest(int boardLength, String userToken, String gameToken, int timeout) {
-        Tak.GameParameter gameParameter = Tak.GameParameter.newBuilder().setBoardLength(boardLength).build();
-        Netcode.MatchRequest.Builder matchRequestBuilder = Netcode.MatchRequest.newBuilder();
-        return matchRequestBuilder
-                .setUserToken(userToken)
-                .setGameToken(gameToken)
-                .setTimeoutSuggestionSeconds(timeout)
-                .setTakGameParameters(gameParameter)
-                .build();
-    }
-
-    public Netcode.TurnRequest createTurnRequest(Netcode.MatchIDPacket matchIDPacket, Tak.GameTurn gameTurn) {
-        return  Netcode.TurnRequest.newBuilder()
-                .setMatchId(matchIDPacket)
-                .setTakGameTurn(gameTurn)
-                .build();
-    }
-
-    public Netcode.MatchIDPacket createMatchIdPacket(String userToken, String matchToken){
-        return Netcode.MatchIDPacket.newBuilder()
+    public void initMatchIDPacket(String userToken, String matchToken) {
+        matchIDPacket = Netcode.MatchIDPacket.newBuilder()
                 .setUserToken(userToken)
                 .setMatchToken(matchToken)
                 .build();
     }
 
-    public Netcode.IDPacket createIDPacket(String userToken) {
-        return Netcode.IDPacket.newBuilder()
-                .setUserToken(userToken)
+    public Netcode.GameStateResponse getGameState() {
+        return stub.getGameState(matchIDPacket);
+    }
+
+    public int getTimeout() {
+        return stub.getTimeout(matchIDPacket).getTimeoutSeconds();
+    }
+
+    public Netcode.OpponentInfoResponse getOpponentInfo() {
+        return stub.getOpponentInfo(matchIDPacket);
+    }
+
+    public Netcode.MatchResponse createMatchRequest(int boardLength, String userToken, String gameToken, int timeout) {
+        Tak.GameParameter gameParameter = Tak.GameParameter.newBuilder()
+                .setBoardLength(boardLength)
                 .build();
+        Netcode.MatchRequest request  = Netcode.MatchRequest.newBuilder()
+                .setUserToken(userToken)
+                .setGameToken(gameToken)
+                .setTimeoutSuggestionSeconds(timeout)
+                .setTakGameParameters(gameParameter)
+                .build();
+        return stub.newMatch(request);
+    }
+
+    public Netcode.TurnResponse submitTurn(Tak.GameTurn gameTurn) {
+        Netcode.TurnRequest request = Netcode.TurnRequest.newBuilder()
+                                        .setMatchId(matchIDPacket)
+                                        .setTakGameTurn(gameTurn)
+                                        .build();
+        return stub.submitTurn(request);
+    }
+
+    public void setGroupName() {
+        Netcode.AuthPacket authPacket = Netcode.AuthPacket.newBuilder()
+                .setMatrNumber("11902857")
+                .setSecret("Algo123+")
+                .build();
+
+        Netcode.SetPseudonymRequest request =  Netcode.SetPseudonymRequest.newBuilder()
+                .setAuth(authPacket)
+                .setPseudonym("StickFish")
+                .build();
+        Netcode.SetPseudonymResponse response =  stub.setGroupPseudonym(request);
+        logger.info(response.getErrorCode());
     }
 }
