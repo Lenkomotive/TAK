@@ -3,6 +3,7 @@ package json;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
+import utils.PieceColor;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
@@ -18,8 +19,12 @@ public class JsonWriter {
 
     private static final String PATH = "src/main/java/json/game_state.json";
 
-    public static void writeGameStateToJSON(Tak.GameState state) {
+    public static void writeGameStateToJSON(Tak.GameState state, boolean beginningPlayer) {
+        PieceColor ourColor = beginningPlayer? PieceColor.WHITE:PieceColor.BLACK;
+        PieceColor opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
         JsonObjectBuilder json = Json.createObjectBuilder()
+                .add("our_piece_color", ourColor.ordinal())
+                .add("opponent_piece_color", opponentColor.ordinal())
                 .add("board_length", state.getBoardLength())
                 .add("remaining_capstones_white", state.getRemainingCapstonesList().get(0))
                 .add("remaining_capstones_black", state.getRemainingCapstonesList().get(1))
@@ -31,14 +36,18 @@ public class JsonWriter {
         int y = 0;
         for (Tak.Pile pile: state.getBoardList()) {
             JsonArrayBuilder pileArray = Json.createArrayBuilder();
+            int position = 0;
             for(Tak.Piece piece: pile.getPiecesList()) {
+                PieceColor color = piece.getSecondPlayerOwned()? opponentColor : ourColor;
                 JsonObjectBuilder pieceBuilder = Json.createObjectBuilder();
                 pieceBuilder
                         .add("x", x)
                         .add("y", y)
+                        .add("position_in_pile", position)
                         .add("piece_type", piece.getTypeValue())
-                        .add("second_player_owned", piece.getSecondPlayerOwned());
+                        .add("piece_color", color.ordinal());
                 pileArray.add(pieceBuilder);
+                position++;
             }
             x++;
             if(x == state.getBoardLength()) {

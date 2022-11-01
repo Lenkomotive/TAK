@@ -16,7 +16,7 @@ public class Main {
 
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 8;
+    private static int BOARD_LENGTH = 6;
     private static final int TIMEOUT = 10;
 
     private static Client client;
@@ -77,8 +77,9 @@ public class Main {
             }
             Tak.GameState state = client.getGameState().getTakGameState();
             Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
+            JsonWriter.writeGameStateToJSON(client.getGameState().getTakGameState(), beginningPlayer);
             playTurn(turn);
-            JsonWriter.writeGameStateToJSON(client.getGameState().getTakGameState());
+            JsonWriter.writeGameStateToJSON(client.getGameState().getTakGameState(), beginningPlayer);
         }
         logger.info("Match endend with status: " + client.getGameState().getGameStatus());
         logger.info("-----------------------------------------------------------------");
