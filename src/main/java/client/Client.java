@@ -60,9 +60,9 @@ public class Client {
 
     public Netcode.TurnResponse submitTurn(Tak.GameTurn gameTurn) {
         Netcode.TurnRequest request = Netcode.TurnRequest.newBuilder()
-                                        .setMatchId(matchIDPacket)
-                                        .setTakGameTurn(gameTurn)
-                                        .build();
+                .setMatchId(matchIDPacket)
+                .setTakGameTurn(gameTurn)
+                .build();
         return stub.submitTurn(request);
     }
 

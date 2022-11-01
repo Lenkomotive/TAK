@@ -1,5 +1,6 @@
 import algorithm.MinMax;
 import client.Client;
+import json.JsonWriter;
 import netcode.Netcode;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
@@ -77,6 +78,7 @@ public class Main {
             Tak.GameState state = client.getGameState().getTakGameState();
             Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
             playTurn(turn);
+            JsonWriter.writeGameStateToJSON(client.getGameState().getTakGameState());
         }
         logger.info("Match endend with status: " + client.getGameState().getGameStatus());
         logger.info("-----------------------------------------------------------------");
