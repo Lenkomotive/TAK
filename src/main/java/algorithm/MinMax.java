@@ -18,12 +18,8 @@ public final class MinMax {
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tree constructTree(Tak.GameState state) {
-        logger.info(getAllPartitions(5,3));
-        Tree tree = new Tree();
-        tree.root = new Node();
-        tree.root.currentState = state;
-        tree.root.children = new ArrayList<>();
-        tree.root.min = false;
+       // logger.info(getAllPartitions(5,3));
+        Tree tree = new Tree(state);
         tree.root.children.addAll(getAllFlatStonePlaceAction(state, true));
 
 
@@ -36,7 +32,7 @@ public final class MinMax {
     public static List<Node> getAllFlatStonePlaceAction(Tak.GameState state, boolean min) {
         Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
 
-        logger.info("old State: ");
+        //logger.info("old State: ");
         printBoard(state, 0, true);
         var board = state.getBoardList();
 
@@ -150,6 +146,6 @@ public final class MinMax {
 
             }
         }
-        logger.info(boardStr.substring(0,boardStr.length()-3) + " stones:" + state.getRemainingStonesList() + " index: " + index + " our color: " + ourColor);
+       // logger.info(boardStr.substring(0,boardStr.length()-3) + " stones:" + state.getRemainingStonesList() + " index: " + index + " our color: " + ourColor);
     }
 }
