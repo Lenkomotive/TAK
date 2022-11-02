@@ -5,9 +5,14 @@ import org.apache.log4j.Logger;
 import tak.Tak;
 import utils.Coordinates;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class MinMax {
+
+
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tree constructTree(Tak.GameState state) {
         logger.info("Tree is in construction...");
@@ -53,5 +58,11 @@ public final class MinMax {
         return coordinates;
     }
 
-
+    private static List<List<Integer>> getAllPartitions(int pieceCount, int fieldCount) {
+        List<List<Integer>> partitions = PartitionHelper.getAllPartitions(pieceCount);
+        List<List<Integer>> permutations = new ArrayList<>();
+        partitions.forEach(e -> permutations.addAll(PermutationHelper.permute(e)));
+        permutations.add(Collections.singletonList(pieceCount));
+        return permutations.stream().filter(perm -> perm.size() <= fieldCount).collect(Collectors.toList());
+    }
 }
