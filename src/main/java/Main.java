@@ -6,6 +6,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
+import utils.PieceColor;
 
 import static java.lang.Thread.sleep;
 
@@ -16,7 +17,7 @@ public class Main {
 
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 5;
+    private static int BOARD_LENGTH = 4;
     private static final int TIMEOUT = 10;
 
     private static Client client;
@@ -39,6 +40,9 @@ public class Main {
         Netcode.MatchResponse response = client.createMatchRequest(BOARD_LENGTH, USER_TOKEN, GAME_TOKEN, TIMEOUT);
         beginningPlayer = response.getBeginningPlayer();
         logger.info("Beginning player: " + beginningPlayer);
+
+        MinMax.ourColor = beginningPlayer? PieceColor.WHITE : PieceColor.BLACK;
+        logger.info("our color: " + MinMax.ourColor);
 
         String matchToken = response.getMatchToken();
         logger.info("Match token: " + matchToken);
@@ -76,6 +80,7 @@ public class Main {
                 continue;
             }
             Tak.GameState state = client.getGameState().getTakGameState();
+            MinMax.constructTree(state);
             Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
             playTurn(turn);
         }
