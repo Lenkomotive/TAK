@@ -6,6 +6,11 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
+import utils.PieceColor;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static java.lang.Thread.sleep;
 
@@ -14,19 +19,26 @@ public class Main {
 
     private static int SLEEP_MS = 1000;
 
+    private static String PATH_TO_GAMES_FOLDER = "src/main/java/json/games/";
+    private static String currentFolderForGames;
+    private static int turnCount;
+
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 5;
+    private static int BOARD_LENGTH = 8;
     private static final int TIMEOUT = 10;
 
     private static Client client;
 
     private static boolean beginningPlayer;
 
-    public static void main(String[] args) throws InterruptedException {
-        BasicConfigurator.configure(); //
+    public static void main(String[] args) throws InterruptedException, IOException {
+        BasicConfigurator.configure(); //log4j
+
         client = new Client();
         while(true) {
+            turnCount = 0;
+            createFolderForGameStates();
             createMatch();
             waitForMatchToStart();
             checkOpponentInfo();
@@ -39,6 +51,9 @@ public class Main {
         Netcode.MatchResponse response = client.createMatchRequest(BOARD_LENGTH, USER_TOKEN, GAME_TOKEN, TIMEOUT);
         beginningPlayer = response.getBeginningPlayer();
         logger.info("Beginning player: " + beginningPlayer);
+
+        MinMax.ourColor = beginningPlayer? PieceColor.WHITE : PieceColor.BLACK;
+        logger.info("our color: " + MinMax.ourColor);
 
         String matchToken = response.getMatchToken();
         logger.info("Match token: " + matchToken);
@@ -76,10 +91,11 @@ public class Main {
                 continue;
             }
             Tak.GameState state = client.getGameState().getTakGameState();
+            MinMax.constructTree(state);
             Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
             playTurn(turn);
         }
-        logger.info("Match endend with status: " + client.getGameState().getGameStatus());
+        logger.info("Match ended with status: " + client.getGameState().getGameStatus());
         logger.info("-----------------------------------------------------------------");
     }
 
@@ -94,7 +110,7 @@ public class Main {
     }
 
     private static void playTurn(Tak.GameTurn turn) {
-        JsonWriter.writeGameStateToJSON(client.getGameState().getTakGameState(), beginningPlayer);
+        writeToJSON();
         Netcode.TurnResponse response = client.submitTurn(turn);
         switch (response.getTurnStatus()) {
             case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
@@ -102,6 +118,22 @@ public class Main {
             case INVALID_TURN -> logger.error("Invalid Turn played!");
             case MATCH_OVER -> logger.info("Match is over!");
         }
-        JsonWriter.writeGameStateToJSON(client.getGameState().getTakGameState(), beginningPlayer);
+        writeToJSON();
+    }
+
+    private static void writeToJSON() {
+        JsonWriter.writeGameStateToJSON(
+                client.getGameState().getTakGameState(),
+                PATH_TO_GAMES_FOLDER + currentFolderForGames + "/game_state_" + turnCount +  ".json",
+                beginningPlayer);
+        turnCount++;
+    }
+
+    private static void createFolderForGameStates() throws IOException {
+        long count = Files.find(Paths.get(PATH_TO_GAMES_FOLDER),1,
+                (path, attributes) -> attributes.isDirectory()
+        ).count() - 1;
+        currentFolderForGames = "game_" + count;
+        Files.createDirectories(Paths.get(PATH_TO_GAMES_FOLDER + currentFolderForGames));
     }
 }

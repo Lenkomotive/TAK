@@ -17,9 +17,9 @@ import java.util.Map;
 public class JsonWriter {
     private static final Logger logger = LogManager.getLogger(JsonWriter.class);
 
-    private static final String PATH = "src/main/java/json/game_state.json";
+    private static final String PATH = "src/main/java/json/games/game_state.json";
 
-    public static void writeGameStateToJSON(Tak.GameState state, boolean beginningPlayer) {
+    public static void writeGameStateToJSON(Tak.GameState state, String path, boolean beginningPlayer) {
         PieceColor ourColor = beginningPlayer? PieceColor.WHITE:PieceColor.BLACK;
         PieceColor opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
         JsonObjectBuilder json = Json.createObjectBuilder()
@@ -57,12 +57,12 @@ public class JsonWriter {
             boardArray.add(pileArray);
         }
         json.add("board", boardArray);
-        writeJSONToFile(json);
+        writeJSONToFile(json, path);
     }
 
-    private static void writeJSONToFile(JsonObjectBuilder json) {
+    private static void writeJSONToFile(JsonObjectBuilder json, String path) {
         try {
-            FileWriter file = new FileWriter(PATH);
+            FileWriter file = new FileWriter(path);
             file.write(prettyPrint(json.build().toString()));
             file.close();
         } catch (IOException e) {
