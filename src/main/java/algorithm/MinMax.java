@@ -15,6 +15,7 @@ public final class MinMax {
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tree constructTree(Tak.GameState state) {
+        getAllPartitions(5,3);
         logger.info("Tree is in construction...");
         evaluate(state);
         return null;
