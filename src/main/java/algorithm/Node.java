@@ -15,6 +15,7 @@ public class Node {
 
     public Node(){};
     public Node(Node parent, boolean min, Tak.GameTurn gameTurn, Tak.GameState gameState) {
+        this.parent = parent;
         this.min = min;
         this.gameTurn = gameTurn;
         this.currentState = gameState;

@@ -23,7 +23,7 @@ public class Main {
 
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 8;
+    private static int BOARD_LENGTH = 5;
     private static final int TIMEOUT = 10;
 
     private static Client client;
@@ -34,7 +34,7 @@ public class Main {
         BasicConfigurator.configure(); //log4j
 
         client = new Client();
-        while(true) {
+        for (int i = 0; i < 500; i++) {
             turnCount = 0;
             currentFolderForGameStates = JSONWriter.createFolderForGameStates(PATH_TO_GAMES_FOLDER);
             createMatch();
@@ -89,7 +89,7 @@ public class Main {
                 continue;
             }
             Tak.GameState state = client.getGameState().getTakGameState();
-            //MinMax.constructTree(state);
+            MinMax.constructTree(state);
             Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
             playTurn(turn);
         }
