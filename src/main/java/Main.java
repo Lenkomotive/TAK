@@ -1,6 +1,6 @@
 import algorithm.MinMax;
 import client.Client;
-import json.JsonWriter;
+import json.JSONWriter;
 import netcode.Netcode;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
@@ -9,8 +9,6 @@ import tak.Tak;
 import utils.PieceColor;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static java.lang.Thread.sleep;
 
@@ -20,7 +18,7 @@ public class Main {
     private static int SLEEP_MS = 1000;
 
     private static String PATH_TO_GAMES_FOLDER = "src/main/java/json/games/";
-    private static String currentFolderForGames;
+    private static String currentFolderForGameStates;
     private static int turnCount;
 
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
@@ -38,7 +36,7 @@ public class Main {
         client = new Client();
         while(true) {
             turnCount = 0;
-            createFolderForGameStates();
+            currentFolderForGameStates = JSONWriter.createFolderForGameStates(PATH_TO_GAMES_FOLDER);
             createMatch();
             waitForMatchToStart();
             checkOpponentInfo();
@@ -91,7 +89,7 @@ public class Main {
                 continue;
             }
             Tak.GameState state = client.getGameState().getTakGameState();
-            MinMax.constructTree(state);
+            //MinMax.constructTree(state);
             Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
             playTurn(turn);
         }
@@ -122,18 +120,10 @@ public class Main {
     }
 
     private static void writeToJSON() {
-        JsonWriter.writeGameStateToJSON(
+        JSONWriter.writeGameStateToJSON(
                 client.getGameState().getTakGameState(),
-                PATH_TO_GAMES_FOLDER + currentFolderForGames + "/game_state_" + turnCount +  ".json",
+                PATH_TO_GAMES_FOLDER + currentFolderForGameStates + "/game_state_" + turnCount +  ".json",
                 beginningPlayer);
         turnCount++;
-    }
-
-    private static void createFolderForGameStates() throws IOException {
-        long count = Files.find(Paths.get(PATH_TO_GAMES_FOLDER),1,
-                (path, attributes) -> attributes.isDirectory()
-        ).count() - 1;
-        currentFolderForGames = "game_" + count;
-        Files.createDirectories(Paths.get(PATH_TO_GAMES_FOLDER + currentFolderForGames));
     }
 }

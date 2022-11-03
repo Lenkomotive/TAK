@@ -18,60 +18,71 @@ public final class MinMax {
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tree constructTree(Tak.GameState state) {
-       // logger.info(getAllPartitions(5,3));
         Tree tree = new Tree(state);
-        tree.root.children.addAll(getAllFlatStonePlaceAction(state, true));
-
-
-       // getAllPartitions(5,3);
+        tree.root.children.addAll(getAllFlatStonePlaceAction(tree.root, state, true));
         logger.info("Tree is in construction...");
-       // evaluate(state);
         return null;
     }
 
-    public static List<Node> getAllFlatStonePlaceAction(Tak.GameState state, boolean min) {
-        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
+    public static List<Node> getAllFlatStonePlaceAction(Node parent, Tak.GameState state, boolean min) {
+        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder()
+                .setPiece(Tak.PieceType.FLAT_STONE)
+                .build();
+        List<Node> children = new ArrayList<>();
 
-        //logger.info("old State: ");
         printBoard(state, 0, true);
         var board = state.getBoardList();
 
         for (int i = 0; i < board.size(); i++) {
             if (board.get(i).getPiecesCount() == 0) {
-                Node node = new Node();
-                node.min = min;
-                Coordinates coordinates = translateIndexToCoordinates(state.getBoardLength(), i);
-                node.positionX = coordinates.X;
-                node.PositionY = coordinates.Y;
-                node.placeAction = placeAction;
-                List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
-                Tak.Piece newPiece = Tak.Piece.newBuilder().
-                        setType(Tak.PieceType.FLAT_STONE)
-                        .setSecondPlayerOwned(!min)
-                        .build();
+                Tak.GameTurn gameTurn = createGameTurn(state.getBoardLength(), i, placeAction);
+
+                Tak.Piece newPiece = createPiece(Tak.PieceType.FLAT_STONE, !min);
+
                 Tak.Pile newPile = Tak.Pile.newBuilder().addPieces(newPiece).build();
+
+                List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
                 newBoard.add(i,newPile);
 
                 List<Integer> newRemainingStonesList = new ArrayList<>(state.getRemainingStonesList());
-                newRemainingStonesList.set(ourColor.ordinal(), state.getRemainingStonesList().get(ourColor.ordinal()) - 1);
+                int newRemainingStonesCount = state.getRemainingStonesList().get(ourColor.ordinal()) - 1;
+                newRemainingStonesList.set(ourColor.ordinal(), newRemainingStonesCount);
+                Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
+                        newBoard, newRemainingStonesList, state.getRemainingCapstonesList());
 
-                Tak.GameState newGameState = Tak.GameState.newBuilder()
-                        .setBoardLength(state.getBoardLength())
-                        .addAllBoard(newBoard)
-                        .addAllRemainingStones(newRemainingStonesList)
-                        .addAllRemainingCapstones(state.getRemainingCapstonesList())
-                        .build();
-
-                node.currentState = newGameState;
-                node.children = new ArrayList<>();
-
+                children.add(new Node(parent, min, gameTurn, newGameState));
                 printBoard(newGameState, i, false);
             }
         }
-
-
-        return Collections.emptyList();
+        return children;
     }
+
+    private static Tak.GameState createNewGameState(int boardLength, List<Tak.Pile> newBoard,
+                                                    List<Integer> remainingStonesList, List<Integer> remainingCapstonesList) {
+        return Tak.GameState.newBuilder()
+                .setBoardLength(boardLength)
+                .addAllBoard(newBoard)
+                .addAllRemainingStones(remainingStonesList)
+                .addAllRemainingCapstones(remainingCapstonesList)
+                .build();
+    }
+
+    private static Tak.Piece createPiece(Tak.PieceType pieceType, boolean min) {
+        return Tak.Piece.newBuilder().
+                setType(pieceType)
+                .setSecondPlayerOwned(min)
+                .build();
+    }
+
+    private static Tak.GameTurn createGameTurn(int boardLength, int index, Tak.PlaceAction placeAction) {
+        Coordinates coordinates = translateIndexToCoordinates(boardLength, index);
+        return Tak.GameTurn.newBuilder()
+                .setX(coordinates.X)
+                .setY(coordinates.Y)
+                .setPlace(placeAction)
+                .build();
+    }
+
     public static int evaluate(Tak.GameState state) {
         logger.info("Boards are evaluated...");
         return 0;

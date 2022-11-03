@@ -11,11 +11,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JsonWriter {
-    private static final Logger logger = LogManager.getLogger(JsonWriter.class);
+public class JSONWriter {
+    private static final Logger logger = LogManager.getLogger(JSONWriter.class);
 
     private static final String PATH = "src/main/java/json/games/game_state.json";
 
@@ -88,4 +90,13 @@ public class JsonWriter {
         }
         return sw.toString();
     }
+
+     public static String createFolderForGameStates(String pathToFolder) throws IOException {
+         long count = Files.find(Paths.get(pathToFolder),1,
+                 (path, attributes) -> attributes.isDirectory()
+         ).count() - 1;
+         String folderName = "game_" + count;
+         Files.createDirectories(Paths.get(pathToFolder + folderName));
+         return folderName;
+     }
 }
