@@ -82,15 +82,23 @@ public class Main {
     }
 
     private static void gameLoop() throws InterruptedException {
+        boolean firstMove = true;
         while(matchIsRunning()) {
             if(itIsOpponentsTurn()) {
                 logger.info("Opponents turn, let's wait...");
                 sleep(SLEEP_MS);
                 continue;
             }
+            Tak.GameTurn turn = null;
             Tak.GameState state = client.getGameState().getTakGameState();
-            MinMax.constructTree(state);
-            Tak.GameTurn turn = MinMax.playValidPlaceMove(state);
+            if(firstMove) {
+                turn = MinMax.playFirstMove(state);
+                firstMove = false;
+            } else {
+                MinMax.playSmartMove(state);
+                turn = MinMax.playValidPlaceMove(state);
+            }
+
             playTurn(turn);
         }
         logger.info("Match ended with status: " + client.getGameState().getGameStatus());

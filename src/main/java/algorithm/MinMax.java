@@ -17,7 +17,7 @@ public final class MinMax {
     public static PieceColor ourColor;
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
-    public static Tree constructTree(Tak.GameState state) {
+    public static Tak.GameTurn playSmartMove(Tak.GameState state) {
         Tree tree = new Tree(state);
         tree.root.children.addAll(createAllPlaceGameTurns(tree.root, state, true));
         logger.info("Tree is in construction...");
@@ -25,42 +25,63 @@ public final class MinMax {
     }
 
     public static List<Node> createAllPlaceGameTurns(Node parent, Tak.GameState state, boolean min) {
-
+        // place actions are only valid on empty fields
+        printBoard(state, 69);
         List<Node> children = new ArrayList<>();
         for(Tak.PieceType pieceType : Tak.PieceType.values()) {
+            if(pieceType == Tak.PieceType.UNRECOGNIZED) continue;
             for (int i = 0; i < state.getBoardList().size(); i++) {
+                // check if the field is empty
                 if (state.getBoardList().get(i).getPiecesCount() == 0) {
-                    Tak.PlaceAction placeAction = createPlaceAction(pieceType);
-                    Tak.GameTurn gameTurn = createGameTurn(state.getBoardLength(), i, placeAction);
-
-                    Tak.Piece newPiece = createPiece(pieceType, !min);
-                    Tak.Pile newPile = Tak.Pile.newBuilder().addPieces(newPiece).build();
-
-                    List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
-                    newBoard.add(i,newPile);
+                    // copy the old values in order to update and assign to new state
                     List<Integer> newRemainingStonesList = new ArrayList<>(state.getRemainingStonesList());
                     List<Integer> newRemainingCapStonesList = new ArrayList<>(state.getRemainingCapstonesList());
-
                     switch (pieceType) {
                         case FLAT_STONE:
                         case STANDING_STONE:
-                            int newRemainingStonesCount = state.getRemainingStonesList().get(ourColor.ordinal()) - 1;
-                            newRemainingStonesList.set(ourColor.ordinal(), newRemainingStonesCount);
+                            int stoneCount = state.getRemainingStonesList().get(ourColor.ordinal());
+                            if(stoneCount == 0) continue; // if no stones left we can not make a move and therefore no new child
+                            newRemainingStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
                             break;
                         case CAPSTONE:
-                            int newRemainingCapStonesCount = state.getRemainingCapstonesList().get(ourColor.ordinal()) - 1;
-                            newRemainingCapStonesList.set(ourColor.ordinal(), newRemainingCapStonesCount);
+                            stoneCount = state.getRemainingCapstonesList().get(ourColor.ordinal());
+                            if(stoneCount == 0) continue; // if no capstones left we can not make a move and therefore no new child
+                            newRemainingCapStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
                             break;
                     }
 
+                    // in order to later know which turn was played, we create a GameTurn object to save it in the node
+                    Tak.PlaceAction placeAction = createPlaceAction(pieceType);
+                    Tak.GameTurn gameTurn = createGameTurn(state.getBoardLength(), i, placeAction);
+
+                    // since a move was played, we need to update the board as well
+                    boolean secondPlayerOwned = getSecondPlayerOwned(min);
+                    Tak.Piece newPiece = createPiece(pieceType, secondPlayerOwned);
+                    Tak.Pile newPile = Tak.Pile.newBuilder().addPieces(newPiece).build();
+                    List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
+                    newBoard.set(i, newPile);
+
+                    // now we can create a new state, and from this new state the next moves can be played
                     Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
                             newBoard, newRemainingStonesList, newRemainingCapStonesList);
-
+                    printBoard(newGameState, i);
                     children.add(new Node(parent, min, gameTurn, newGameState));
                 }
             }
         }
         return children;
+    }
+
+    private static boolean getSecondPlayerOwned(boolean min) {
+        // at min level we make moves, at max (!min) level, opponent makes moves
+        boolean secondPlayerOwned = false;
+        if((min && ourColor == PieceColor.WHITE) || (!min && ourColor == PieceColor.BLACK)) {
+            secondPlayerOwned = false;
+        }
+        if((min && ourColor == PieceColor.BLACK) || (!min && ourColor == PieceColor.WHITE)) {
+            secondPlayerOwned = true;
+        }
+        return secondPlayerOwned;
     }
 
     private static Tak.PlaceAction createPlaceAction(Tak.PieceType type) {
@@ -105,17 +126,9 @@ public final class MinMax {
     }
 
     public static Tak.GameTurn playValidPlaceMove(Tak.GameState state) {
-        List<Tak.Pile> board = state.getBoardList();
-        int freeFieldIndex = findFirstFreeField(board);
-        Coordinates coordinates = translateIndexToCoordinates(state.getBoardLength(), freeFieldIndex);
-        Tak.PieceType pieceType = Tak.PieceType.FLAT_STONE;
-        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(pieceType).build();
-
-        return Tak.GameTurn.newBuilder()
-                .setX(coordinates.X)
-                .setY(coordinates.Y)
-                .setPlace(placeAction)
-                .build();
+        int freeFieldIndex = findFirstFreeField(state.getBoardList());
+        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
+        return createGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
     }
 
     private static int findFirstFreeField(List<Tak.Pile> board) {
@@ -142,33 +155,33 @@ public final class MinMax {
         return permutations.stream().filter(perm -> perm.size() <= fieldCount).collect(Collectors.toList());
     }
 
-    private static void printBoard(Tak.GameState state, int index, boolean fuck) {
+    private static void printBoard(Tak.GameState state, int index) {
         String boardStr = "";
-        if(fuck) {
-            boardStr += "_,";
-        }
+
         for (var pile: state.getBoardList()) {
             if(pile.getPiecesCount() == 0) {
                 boardStr += "_,";
             }
             else {
                 Tak.Piece piece = pile.getPieces(pile.getPiecesCount() -1);
-                String top = "";
+                String top = "W";
                 if(piece.getSecondPlayerOwned()) {
-                    top = "W";
-                    if(ourColor == PieceColor.WHITE) {
-                        top = "B";
-                    }
-                } else {
                     top = "B";
-                    if(ourColor == PieceColor.WHITE) {
-                        top = "W";
-                    }
                 }
                 boardStr += top + ",";
 
             }
         }
-       // logger.info(boardStr.substring(0,boardStr.length()-3) + " stones:" + state.getRemainingStonesList() + " index: " + index + " our color: " + ourColor);
+       //logger.info(boardStr.substring(0,boardStr.length()-3) + " stones:" + state.getRemainingStonesList() + " index: " + index + " our color: " + ourColor);
+    }
+
+    // place opponents piece in corner
+    public static Tak.GameTurn playFirstMove(Tak.GameState state) {
+        int index = 0;
+        if(state.getBoardList().get(0).getPiecesCount() != 0) {
+            index = state.getBoardCount() - 1;
+        }
+        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
+        return createGameTurn(state.getBoardLength(), index, placeAction);
     }
 }
