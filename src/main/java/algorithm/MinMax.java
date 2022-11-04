@@ -1,6 +1,5 @@
 package algorithm;
 
-import com.google.protobuf.Empty;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
@@ -18,14 +17,15 @@ public final class MinMax {
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
-        Tree tree = new Tree(state);
-        tree.root.children.addAll(createAllPlaceGameTurns(tree.root, state, true));
-        tree.root.children.addAll(createAllMoveGameTurns(tree.root, state, true));
+         logger.info(getAllPossibleDrops(3, 5));
+//        Tree tree = new Tree(state);
+//        tree.root.children.addAll(createAllPlaceNodes(tree.root, state, true));
+//        tree.root.children.addAll(createAllMoveNodes(tree.root, state, true));
         return null;
     }
 
 
-    public static List<Node> createAllPlaceGameTurns(Node parent, Tak.GameState state, boolean min) {
+    public static List<Node> createAllPlaceNodes(Node parent, Tak.GameState state, boolean min) {
         // place actions are only valid on empty fields
         printBoard(state, 69);
         List<Node> children = new ArrayList<>();
@@ -54,7 +54,7 @@ public final class MinMax {
 
                 // in order to later know which turn was played, we create a GameTurn object to save it in the node
                 Tak.PlaceAction placeAction = createPlaceAction(pieceType);
-                Tak.GameTurn gameTurn = createGameTurn(state.getBoardLength(), i, placeAction);
+                Tak.GameTurn gameTurn = createPlaceGameTurn(state.getBoardLength(), i, placeAction);
 
                 // since a move was played, we need to update the board as well
                 boolean secondPlayerOwned = getSecondPlayerOwned(min);
@@ -73,26 +73,62 @@ public final class MinMax {
         return children;
     }
 
-//    You can move one or more pieces in a stack that you control.
-//    A stack can be any height, including just one piece. "Control" simply means that your piece is on top.
-//    To move a stack, take as many as five pieces off the top (see Carry Limit, at right),
-//    and move them in a straight line, dropping at least one piece off the bottom in each space along the way.
-//    The pieces that you drop will cover any stacks that are in their path.
-//    Capstones and standing stones block movement, because they cannot be covered.
-
-    private static List<Node> createAllMoveGameTurns(Node parent, Tak.GameState state, boolean min) {
+    public static List<Node> createAllMoveNodes(Node parent, Tak.GameState state, boolean min) {
+        List<Node> children = new ArrayList<>();
         for (int i = 0; i < state.getBoardList().size(); i++) {
+            Tak.Pile currentPile = state.getBoardList().get(i);
             // if there is no piece placed, player can not move it
-            if (state.getBoardList().get(i).getPiecesCount() == 0) continue;
+            if (currentPile.getPiecesCount() == 0) continue;
             // if pile is not under control, player can not move it
-            if (!pileIsUnderControl(state.getBoardList().get(i), min)) continue;
+            if (!pileIsUnderControl(currentPile, min)) continue;
 
             Coordinates coordinates = translateIndexToCoordinates(state.getBoardLength(), i);
+            Map<Tak.Direction, Integer> directionsMap = getNOSWFreeFields(coordinates, state);
+            // the carryLimit can be at maximum the boardLength or less if pile has fewer pieces
+            int carryLimit = Math.min(currentPile.getPiecesCount(), state.getBoardLength());
+            // create Nodes for all directions
+            for(var direction: Tak.Direction.values()) {
+                if(direction == Tak.Direction.UNRECOGNIZED) continue;
+                // for every direction, the free fields were calculated
+                int freeFieldCount = directionsMap.get(direction);
+                // now we need to consider all possible drops in given direction for up to freeFieldCount fields
+                List<List<Integer>> allPossibleDrops = getAllPossibleDrops(freeFieldCount, carryLimit);
+                // from the calculated drops we can create moveActions
+                List<Tak.MoveAction> moveActions = createMoveActionsFromDrops(allPossibleDrops, direction);
+                for(var moveAction: moveActions) {
+                    Tak.GameTurn gameTurn = createMoveGameTurn(coordinates, moveAction);
+                    //!TODO update board according to gameTurn!
+                    List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
+                    // now we can create a new state, and from this new state the next moves can be played
+                    Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
+                            newBoard, state.getRemainingStonesList(), state.getRemainingCapstonesList());
 
-            getNOSWFreeFields(coordinates, state);
-
+                    children.add(new Node(parent, min, gameTurn, newGameState));
+                }
+            }
         }
-        return Collections.emptyList();
+
+        return children;
+    }
+
+    private static Tak.GameTurn createMoveGameTurn(Coordinates coordinates, Tak.MoveAction moveAction) {
+            return Tak.GameTurn.newBuilder().
+                    setX(coordinates.X).
+                    setY(coordinates.Y)
+                    .setMove(moveAction)
+                    .build();
+    }
+
+    private static List<Tak.MoveAction> createMoveActionsFromDrops(List<List<Integer>> allPossibleDrops, Tak.Direction direction) {
+        List<Tak.MoveAction> moveActions = new ArrayList<>();
+        for(var drop : allPossibleDrops) {
+            Tak.MoveAction moveAction = Tak.MoveAction.newBuilder()
+                    .addAllDrops(drop)
+                    .setDirection(direction)
+                    .build();
+            moveActions.add(moveAction);
+        }
+        return moveActions;
     }
 
     public static Map<Tak.Direction, Integer> getNOSWFreeFields(Coordinates coordinates, Tak.GameState state) {
@@ -195,7 +231,7 @@ public final class MinMax {
                 .build();
     }
 
-    private static Tak.GameTurn createGameTurn(int boardLength, int index, Tak.PlaceAction placeAction) {
+    private static Tak.GameTurn createPlaceGameTurn(int boardLength, int index, Tak.PlaceAction placeAction) {
         Coordinates coordinates = translateIndexToCoordinates(boardLength, index);
         return Tak.GameTurn.newBuilder()
                 .setX(coordinates.X)
@@ -216,7 +252,7 @@ public final class MinMax {
     public static Tak.GameTurn playValidPlaceMove(Tak.GameState state) {
         int freeFieldIndex = findFirstFreeField(state.getBoardList());
         Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
-        return createGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
+        return createPlaceGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
     }
 
     private static int findFirstFreeField(List<Tak.Pile> board) {
@@ -235,12 +271,17 @@ public final class MinMax {
         return coordinates;
     }
 
-    private static List<List<Integer>> getAllPartitions(int pieceCount, int fieldCount) {
-        List<List<Integer>> partitions = PartitionHelper.getAllPartitions(pieceCount);
-        List<List<Integer>> permutations = new ArrayList<>();
-        partitions.forEach(e -> permutations.addAll(PermutationHelper.permute(e)));
-        permutations.add(Collections.singletonList(pieceCount));
-        return permutations.stream().filter(perm -> perm.size() <= fieldCount).collect(Collectors.toList());
+    private static List<List<Integer>> getAllPossibleDrops(int fieldCount, int carryLimit) {
+        List<List<Integer>> allPossibleDrops = new ArrayList<>();
+        for(int pieceCount = 1; pieceCount <= carryLimit; pieceCount++) {
+            List<List<Integer>> partitions = PartitionHelper.getAllPartitions(pieceCount);
+            List<List<Integer>> permutations = new ArrayList<>();
+            partitions.forEach(e -> permutations.addAll(PermutationHelper.permute(e)));
+            permutations.add(Collections.singletonList(pieceCount));
+            var drops = permutations.stream().filter(perm -> perm.size() <= fieldCount).collect(Collectors.toList());
+            allPossibleDrops.addAll(drops);
+        }
+        return allPossibleDrops;
     }
 
     private static void printBoard(Tak.GameState state, int index) {
@@ -270,6 +311,6 @@ public final class MinMax {
             index = state.getBoardCount() - 1;
         }
         Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
-        return createGameTurn(state.getBoardLength(), index, placeAction);
+        return createPlaceGameTurn(state.getBoardLength(), index, placeAction);
     }
 }

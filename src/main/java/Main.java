@@ -32,9 +32,9 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
-
+        MinMax.playSmartMove(null);
         client = new Client();
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 1; i++) {
             turnCount = 0;
             currentFolderForGameStates = JSONWriter.createFolderForGameStates(PATH_TO_GAMES_FOLDER);
             createMatch();
@@ -116,8 +116,8 @@ public class Main {
         return status == Netcode.GameStatus.OPPONENTS_TURN;
     }
 
-    private static void playTurn(Tak.GameTurn turn) {
-        writeToJSON();
+    private static void playTurn(Tak.GameTurn turn) throws InterruptedException {
+
         Netcode.TurnResponse response = client.submitTurn(turn);
         switch (response.getTurnStatus()) {
             case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
@@ -128,7 +128,8 @@ public class Main {
         writeToJSON();
     }
 
-    private static void writeToJSON() {
+    private static void writeToJSON() throws InterruptedException {
+        sleep(5000);
         JSONWriter.writeGameStateToJSON(
                 client.getGameState().getTakGameState(),
                 PATH_TO_GAMES_FOLDER + currentFolderForGameStates + "/game_state_" + turnCount +  ".json",
