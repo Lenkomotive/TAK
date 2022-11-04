@@ -13,8 +13,8 @@ public class PileControlTests {
         boolean min = true;
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(false).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
-
         MinMax.ourColor = PieceColor.WHITE;
+
         boolean result = MinMax.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);

@@ -6,15 +6,14 @@ import tak.Tak;
 import utils.Coordinates;
 import utils.PieceColor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class MinMax {
 
 
     public static PieceColor ourColor;
+    public static PieceColor opponentColor;
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
@@ -37,17 +36,18 @@ public final class MinMax {
                 // copy the old values in order to update and assign to new state
                 List<Integer> newRemainingStonesList = new ArrayList<>(state.getRemainingStonesList());
                 List<Integer> newRemainingCapStonesList = new ArrayList<>(state.getRemainingCapstonesList());
+                int remainingStoneIndex = min? ourColor.ordinal(): opponentColor.ordinal();
                 switch (pieceType) {
                     case FLAT_STONE:
                     case STANDING_STONE:
-                        int stoneCount = state.getRemainingStonesList().get(ourColor.ordinal());
+                        int stoneCount = state.getRemainingStonesList().get(remainingStoneIndex); //!
                         if(stoneCount == 0) continue; // if no stones left we can not make a move and therefore no new child
-                        newRemainingStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
+                        newRemainingStonesList.set(remainingStoneIndex, stoneCount - 1); // otherwise subtract one stone for new state
                         break;
                     case CAPSTONE:
-                        stoneCount = state.getRemainingCapstonesList().get(ourColor.ordinal());
+                        stoneCount = state.getRemainingCapstonesList().get(remainingStoneIndex);
                         if(stoneCount == 0) continue; // if no capstones left we can not make a move and therefore no new child
-                        newRemainingCapStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
+                        newRemainingCapStonesList.set(remainingStoneIndex, stoneCount - 1); // otherwise subtract one stone for new state
                         break;
                 }
 
@@ -81,18 +81,27 @@ public final class MinMax {
 
     private static List<Node> createAllMoveGameTurns(Node parent, Tak.GameState state, boolean min) {
         for (int i = 0; i < state.getBoardList().size(); i++) {
-            // if there is no piece placed, we can not move it
+            // if there is no piece placed, player can not move it
             if (state.getBoardList().get(i).getPiecesCount() == 0) continue;
-            // if pile is not under our control, we can not move it
+            // if pile is not under control, player can not move it
             if (!pileIsUnderControl(state.getBoardList().get(i), min)) continue;
-            int carryLimit = state.getBoardLength();
 
+            Coordinates coordinates = translateIndexToCoordinates(state.getBoardLength(), i);
 
+            getNOSWFreeFields(coordinates, state);
 
         }
-
-
         return Collections.emptyList();
+    }
+
+    private static Map<Tak.Direction, Integer> getNOSWFreeFields(Coordinates coordinates, Tak.GameState state) {
+        Map<Tak.Direction, Integer> directions = new HashMap<>();
+        directions.put(Tak.Direction.NORTH, 0);
+        directions.put(Tak.Direction.EAST, 0);
+        directions.put(Tak.Direction.SOUTH, 0);
+        directions.put(Tak.Direction.WEST, 0);
+
+        return directions;
     }
 
     public static boolean pileIsUnderControl(Tak.Pile pile, boolean min) {
@@ -168,10 +177,10 @@ public final class MinMax {
         logger.error("This should never be reached!");
         return -1;
     }
-    public static Coordinates translateIndexToCoordinates(int boardLength, int freeFieldIndex) {
+    public static Coordinates translateIndexToCoordinates(int boardLength, int index) {
         Coordinates coordinates = new Coordinates();
-        coordinates.X = freeFieldIndex % boardLength;
-        coordinates.Y = freeFieldIndex / boardLength;
+        coordinates.X = index % boardLength;
+        coordinates.Y = index / boardLength;
         return coordinates;
     }
 

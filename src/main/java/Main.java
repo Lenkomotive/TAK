@@ -51,6 +51,7 @@ public class Main {
         logger.info("Beginning player: " + beginningPlayer);
 
         MinMax.ourColor = beginningPlayer? PieceColor.WHITE : PieceColor.BLACK;
+        MinMax.opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
         logger.info("our color: " + MinMax.ourColor);
 
         String matchToken = response.getMatchToken();
