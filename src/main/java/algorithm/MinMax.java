@@ -20,9 +20,10 @@ public final class MinMax {
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
         Tree tree = new Tree(state);
         tree.root.children.addAll(createAllPlaceGameTurns(tree.root, state, true));
-        logger.info("Tree is in construction...");
+        tree.root.children.addAll(createAllMoveGameTurns(tree.root, state, true));
         return null;
     }
+
 
     public static List<Node> createAllPlaceGameTurns(Node parent, Tak.GameState state, boolean min) {
         // place actions are only valid on empty fields
@@ -31,45 +32,72 @@ public final class MinMax {
         for(Tak.PieceType pieceType : Tak.PieceType.values()) {
             if(pieceType == Tak.PieceType.UNRECOGNIZED) continue;
             for (int i = 0; i < state.getBoardList().size(); i++) {
-                // check if the field is empty
-                if (state.getBoardList().get(i).getPiecesCount() == 0) {
-                    // copy the old values in order to update and assign to new state
-                    List<Integer> newRemainingStonesList = new ArrayList<>(state.getRemainingStonesList());
-                    List<Integer> newRemainingCapStonesList = new ArrayList<>(state.getRemainingCapstonesList());
-                    switch (pieceType) {
-                        case FLAT_STONE:
-                        case STANDING_STONE:
-                            int stoneCount = state.getRemainingStonesList().get(ourColor.ordinal());
-                            if(stoneCount == 0) continue; // if no stones left we can not make a move and therefore no new child
-                            newRemainingStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
-                            break;
-                        case CAPSTONE:
-                            stoneCount = state.getRemainingCapstonesList().get(ourColor.ordinal());
-                            if(stoneCount == 0) continue; // if no capstones left we can not make a move and therefore no new child
-                            newRemainingCapStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
-                            break;
-                    }
-
-                    // in order to later know which turn was played, we create a GameTurn object to save it in the node
-                    Tak.PlaceAction placeAction = createPlaceAction(pieceType);
-                    Tak.GameTurn gameTurn = createGameTurn(state.getBoardLength(), i, placeAction);
-
-                    // since a move was played, we need to update the board as well
-                    boolean secondPlayerOwned = getSecondPlayerOwned(min);
-                    Tak.Piece newPiece = createPiece(pieceType, secondPlayerOwned);
-                    Tak.Pile newPile = Tak.Pile.newBuilder().addPieces(newPiece).build();
-                    List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
-                    newBoard.set(i, newPile);
-
-                    // now we can create a new state, and from this new state the next moves can be played
-                    Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
-                            newBoard, newRemainingStonesList, newRemainingCapStonesList);
-                    printBoard(newGameState, i);
-                    children.add(new Node(parent, min, gameTurn, newGameState));
+                // if field is not empty we can not place a piece there
+                if (state.getBoardList().get(i).getPiecesCount() != 0) continue;
+                // copy the old values in order to update and assign to new state
+                List<Integer> newRemainingStonesList = new ArrayList<>(state.getRemainingStonesList());
+                List<Integer> newRemainingCapStonesList = new ArrayList<>(state.getRemainingCapstonesList());
+                switch (pieceType) {
+                    case FLAT_STONE:
+                    case STANDING_STONE:
+                        int stoneCount = state.getRemainingStonesList().get(ourColor.ordinal());
+                        if(stoneCount == 0) continue; // if no stones left we can not make a move and therefore no new child
+                        newRemainingStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
+                        break;
+                    case CAPSTONE:
+                        stoneCount = state.getRemainingCapstonesList().get(ourColor.ordinal());
+                        if(stoneCount == 0) continue; // if no capstones left we can not make a move and therefore no new child
+                        newRemainingCapStonesList.set(ourColor.ordinal(), stoneCount - 1); // otherwise subtract one stone for new state
+                        break;
                 }
+
+                // in order to later know which turn was played, we create a GameTurn object to save it in the node
+                Tak.PlaceAction placeAction = createPlaceAction(pieceType);
+                Tak.GameTurn gameTurn = createGameTurn(state.getBoardLength(), i, placeAction);
+
+                // since a move was played, we need to update the board as well
+                boolean secondPlayerOwned = getSecondPlayerOwned(min);
+                Tak.Piece newPiece = createPiece(pieceType, secondPlayerOwned);
+                Tak.Pile newPile = Tak.Pile.newBuilder().addPieces(newPiece).build();
+                List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
+                newBoard.set(i, newPile);
+
+                // now we can create a new state, and from this new state the next moves can be played
+                Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
+                        newBoard, newRemainingStonesList, newRemainingCapStonesList);
+                printBoard(newGameState, i);
+                children.add(new Node(parent, min, gameTurn, newGameState));
             }
         }
         return children;
+    }
+
+//    You can move one or more pieces in a stack that you control.
+//    A stack can be any height, including just one piece. "Control" simply means that your piece is on top.
+//    To move a stack, take as many as five pieces off the top (see Carry Limit, at right),
+//    and move them in a straight line, dropping at least one piece off the bottom in each space along the way.
+//    The pieces that you drop will cover any stacks that are in their path.
+//    Capstones and standing stones block movement, because they cannot be covered.
+
+    private static List<Node> createAllMoveGameTurns(Node parent, Tak.GameState state, boolean min) {
+        for (int i = 0; i < state.getBoardList().size(); i++) {
+            // if there is no piece placed, we can not move it
+            if (state.getBoardList().get(i).getPiecesCount() == 0) continue;
+            // if pile is not under our control, we can not move it
+            if (!pileIsUnderControl(state.getBoardList().get(i), min)) continue;
+            int carryLimit = state.getBoardLength();
+
+
+
+        }
+
+
+        return Collections.emptyList();
+    }
+
+    public static boolean pileIsUnderControl(Tak.Pile pile, boolean min) {
+        Tak.Piece top = pile.getPieces(pile.getPiecesCount() - 1);
+        return  top.getSecondPlayerOwned() == getSecondPlayerOwned(min);
     }
 
     private static boolean getSecondPlayerOwned(boolean min) {
@@ -140,7 +168,7 @@ public final class MinMax {
         logger.error("This should never be reached!");
         return -1;
     }
-    private static Coordinates translateIndexToCoordinates(int boardLength, int freeFieldIndex) {
+    public static Coordinates translateIndexToCoordinates(int boardLength, int freeFieldIndex) {
         Coordinates coordinates = new Coordinates();
         coordinates.X = freeFieldIndex % boardLength;
         coordinates.Y = freeFieldIndex / boardLength;
