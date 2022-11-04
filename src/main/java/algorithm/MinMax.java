@@ -1,5 +1,6 @@
 package algorithm;
 
+import com.google.protobuf.Empty;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
@@ -94,15 +95,65 @@ public final class MinMax {
         return Collections.emptyList();
     }
 
-    private static Map<Tak.Direction, Integer> getNOSWFreeFields(Coordinates coordinates, Tak.GameState state) {
+    public static Map<Tak.Direction, Integer> getNOSWFreeFields(Coordinates coordinates, Tak.GameState state) {
         Map<Tak.Direction, Integer> directions = new HashMap<>();
-        directions.put(Tak.Direction.NORTH, 0);
-        directions.put(Tak.Direction.EAST, 0);
-        directions.put(Tak.Direction.SOUTH, 0);
-        directions.put(Tak.Direction.WEST, 0);
+
+        int maxMoveToNorth = 0;
+        int maxMoveToEast = 0;
+        int maxMoveToSouth = 0;
+        int maxMoveToWest = 0;
+
+        for ( int y = coordinates.Y - 1; y >= 0; y-- ) {
+            int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(coordinates.X, y));
+            List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
+            if ( checkForBlocker(pile) ) break;
+            maxMoveToNorth++;
+        }
+
+        for ( int y = coordinates.Y + 1; y < state.getBoardLength(); y++ ) {
+            int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(coordinates.X, y));
+            List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
+            if ( checkForBlocker(pile) ) break;
+            maxMoveToSouth++;
+        }
+
+        for ( int x = coordinates.X + 1; x < state.getBoardLength(); x++ ) {
+            int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(x, coordinates.Y));
+            List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
+            if ( checkForBlocker(pile) ) break;
+            maxMoveToEast++;
+        }
+
+        for ( int x = coordinates.X - 1; x >= 0; x-- ) {
+            int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(x, coordinates.Y));
+            List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
+            if ( checkForBlocker(pile) ) break;
+            maxMoveToWest++;
+        }
+
+        directions.put(Tak.Direction.NORTH, maxMoveToNorth);
+        directions.put(Tak.Direction.EAST, maxMoveToEast);
+        directions.put(Tak.Direction.SOUTH, maxMoveToSouth);
+        directions.put(Tak.Direction.WEST, maxMoveToWest);
+
 
         return directions;
     }
+
+    private static boolean checkForBlocker(List<Tak.Piece> pile) {
+        if ( pile.size() != 0) {
+            return  pile.get(pile.size() - 1).getType() == Tak.PieceType.CAPSTONE ||
+                    pile.get(pile.size() - 1).getType() == Tak.PieceType.STANDING_STONE;
+        }
+        return false;
+    }
+
+
+    private static int translateCoordinateToIndex(int boardLength, Coordinates coordinates) {
+        int index = coordinates.Y * boardLength + coordinates.X;
+        return index;
+    }
+
 
     public static boolean pileIsUnderControl(Tak.Pile pile, boolean min) {
         Tak.Piece top = pile.getPieces(pile.getPiecesCount() - 1);

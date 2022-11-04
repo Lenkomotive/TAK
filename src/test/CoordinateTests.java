@@ -1,5 +1,5 @@
 import algorithm.MinMax;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.Coordinates;
 
@@ -16,8 +16,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -30,8 +30,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -44,8 +44,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -58,8 +58,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -72,8 +72,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -86,8 +86,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -100,8 +100,8 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class CoordinateTests {
 
         Coordinates result = MinMax.translateIndexToCoordinates(boardLength, index);
 
-        Assert.assertEquals(expected.X, result.X);
-        Assert.assertEquals(expected.Y, result.Y);
+        Assertions.assertEquals(expected.X, result.X);
+        Assertions.assertEquals(expected.Y, result.Y);
     }
 }
