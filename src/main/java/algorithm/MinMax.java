@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public final class MinMax {
 
-    public static int DEPTH = 4;
+    public static int DEPTH = 2;
 
     public static PieceColor ourColor;
     public static PieceColor opponentColor;
@@ -41,12 +41,9 @@ public final class MinMax {
             children = newChildren;
             min = !min;
         }
-        printBoard(children.get(0).currentState);
-
-
-
-
-
+//        for(var child: children) {
+//            printBoard(child.currentState);
+//        }
 
         int i  = 0;
         return null;

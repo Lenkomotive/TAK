@@ -92,6 +92,7 @@ public class Main {
             }
             Tak.GameTurn turn = null;
             Tak.GameState state = client.getGameState().getTakGameState();
+            writeToJSON(state);
             if(firstMove) {
                 turn = MinMax.playFirstMove(state);
                 firstMove = false;
@@ -116,21 +117,20 @@ public class Main {
         return status == Netcode.GameStatus.OPPONENTS_TURN;
     }
 
-    private static void playTurn(Tak.GameTurn turn) throws InterruptedException {
-
+    private static void playTurn(Tak.GameTurn turn) {
         Netcode.TurnResponse response = client.submitTurn(turn);
+        writeToJSON(response.getTakGameState());
         switch (response.getTurnStatus()) {
             case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
             case NOT_YOUR_TURN -> logger.error("It was not our Turn!");
             case INVALID_TURN -> logger.error("Invalid Turn played!");
             case MATCH_OVER -> logger.info("Match is over!");
         }
-        writeToJSON();
     }
 
-    private static void writeToJSON() throws InterruptedException {
+    private static void writeToJSON(Tak.GameState gameState) {
         JSONWriter.writeGameStateToJSON(
-                client.getGameState().getTakGameState(),
+                gameState,
                 PATH_TO_GAMES_FOLDER + currentFolderForGameStates + "/game_state_" + turnCount +  ".json",
                 beginningPlayer);
         turnCount++;

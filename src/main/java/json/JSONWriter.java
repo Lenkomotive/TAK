@@ -40,7 +40,7 @@ public class JSONWriter {
             JsonArrayBuilder pileArray = Json.createArrayBuilder();
             int position = 0;
             for(Tak.Piece piece: pile.getPiecesList()) {
-                PieceColor color = piece.getSecondPlayerOwned()? opponentColor : ourColor;
+                PieceColor color = piece.getSecondPlayerOwned()? PieceColor.BLACK : PieceColor.WHITE;
                 JsonObjectBuilder pieceBuilder = Json.createObjectBuilder();
                 pieceBuilder
                         .add("x", x)
