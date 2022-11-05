@@ -14,7 +14,7 @@ public class MoveGameTurnsTests {
         int expectedChildren = 12;
         int boardLength = 4;
         List<Tak.Pile> board = createBoard(boardLength);
-        board.set(0, getCapStonePile5());
+        board.set(0, getCapStonePile());
         Tak.GameState gameState = createGameState(boardLength, board);
 
         var children = MinMax.createAllMoveNodes(null, gameState, true);
@@ -60,6 +60,8 @@ public class MoveGameTurnsTests {
 
     private Tak.Pile getCapStonePile() {
         return Tak.Pile.newBuilder()
+                .addPieces(getFlatStone())
+                .addPieces(getFlatStone())
                 .addPieces(getFlatStone())
                 .addPieces(getFlatStone())
                 .addPieces(getFlatStone())
