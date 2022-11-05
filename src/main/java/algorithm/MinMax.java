@@ -11,22 +11,50 @@ import java.util.stream.Collectors;
 
 public final class MinMax {
 
+    public static int DEPTH = 1;
 
     public static PieceColor ourColor;
     public static PieceColor opponentColor;
 
     private static final Logger logger = LogManager.getLogger(MinMax.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
+        boolean min = true;
         Tree tree = new Tree(state);
-        tree.root.children.addAll(createAllPlaceNodes(tree.root, state, true));
-        tree.root.children.addAll(createAllMoveNodes(tree.root, state, true));
+        printBoard(state);
+        //min
+        tree.root.children.addAll(createAllPlaceNodes(tree.root, state, min));
+        tree.root.children.addAll(createAllMoveNodes(tree.root, state, min));
+        logger.info("created Nodes: " +tree.root.children.size() + " on min = " + min);
+        min = false;
+        //max
+        int counter = 0;
+        List<Node> children = tree.root.children;
+        for (int i = 0; i < DEPTH; i++) {
+            List<Node> newChildren = new ArrayList<>();
+            for(var child: children) {
+                child.children.addAll(createAllPlaceNodes(child, child.currentState, min));
+                child.children.addAll(createAllMoveNodes(child, child.currentState, min));
+                newChildren.addAll(child.children);
+                counter += child.children.size();
+            }
+            logger.info("created Nodes: " + counter + " on min = " + min );
+            children = newChildren;
+            min = !min;
+        }
+        printBoard(children.get(0).currentState);
+
+
+
+
+
+
+        int i  = 0;
         return null;
     }
 
 
     public static List<Node> createAllPlaceNodes(Node parent, Tak.GameState state, boolean min) {
         // place actions are only valid on empty fields
-        printBoard(state, 69);
         List<Node> children = new ArrayList<>();
         for(Tak.PieceType pieceType : Tak.PieceType.values()) {
             if(pieceType == Tak.PieceType.UNRECOGNIZED) continue;
@@ -40,7 +68,7 @@ public final class MinMax {
                 switch (pieceType) {
                     case FLAT_STONE:
                     case STANDING_STONE:
-                        int stoneCount = state.getRemainingStonesList().get(remainingStoneIndex); //!
+                        int stoneCount = state.getRemainingStonesList().get(remainingStoneIndex);
                         if(stoneCount == 0) continue; // if no stones left we can not make a move and therefore no new child
                         newRemainingStonesList.set(remainingStoneIndex, stoneCount - 1); // otherwise subtract one stone for new state
                         break;
@@ -65,7 +93,6 @@ public final class MinMax {
                 // now we can create a new state, and from this new state the next moves can be played
                 Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
                         newBoard, newRemainingStonesList, newRemainingCapStonesList);
-                printBoard(newGameState, i);
                 children.add(new Node(parent, min, gameTurn, newGameState));
             }
         }
@@ -368,7 +395,7 @@ public final class MinMax {
         return allPossibleDrops;
     }
 
-    private static void printBoard(Tak.GameState state, int index) {
+    private static void printBoard(Tak.GameState state) {
         String boardStr = "";
 
         for (var pile: state.getBoardList()) {
@@ -385,7 +412,7 @@ public final class MinMax {
 
             }
         }
-       //logger.info(boardStr.substring(0,boardStr.length()-3) + " stones:" + state.getRemainingStonesList() + " index: " + index + " our color: " + ourColor);
+       logger.info(boardStr.substring(0,boardStr.length()-3) + " stones:" + state.getRemainingStonesList());
     }
 
     // place opponents piece in corner

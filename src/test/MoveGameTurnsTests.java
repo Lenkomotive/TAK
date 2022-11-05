@@ -1,7 +1,7 @@
 import algorithm.MinMax;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import tak.Tak;
+import utils.PieceColor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +15,13 @@ public class MoveGameTurnsTests {
         int boardLength = 4;
         List<Tak.Pile> board = createBoard(boardLength);
         board.set(0, getCapStonePile());
-        Tak.GameState gameState = createGameState(boardLength, board);
+        Tak.GameState gameState = createGameState3x3(boardLength, board);
 
-        var children = MinMax.createAllMoveNodes(null, gameState, true);
 
-        Assertions.assertEquals(12,children.size());
+        MinMax.ourColor = PieceColor.WHITE;
+        MinMax.opponentColor = PieceColor.BLACK;
+        var children = MinMax.playSmartMove(gameState);
+
     }
 
 
@@ -34,8 +36,33 @@ public class MoveGameTurnsTests {
     }
 
     private Tak.GameState createGameState(int boardLength, List<Tak.Pile> board) {
+
+        List<Integer> newRemainingStonesList = new ArrayList<>();
+        newRemainingStonesList.add(10);
+        newRemainingStonesList.add(10);
+        List<Integer> newRemainingCapStonesList = new ArrayList<>();
+        newRemainingCapStonesList.add(0);
+        newRemainingCapStonesList.add(0);
         return Tak.GameState.newBuilder()
                 .setBoardLength(boardLength)
+                .addAllRemainingStones(newRemainingStonesList)
+                .addAllRemainingCapstones(newRemainingCapStonesList)
+                .addAllBoard(board)
+                .build();
+    }
+
+    private Tak.GameState createGameState3x3(int boardLength, List<Tak.Pile> board) {
+
+        List<Integer> newRemainingStonesList = new ArrayList<>();
+        newRemainingStonesList.add(10);
+        newRemainingStonesList.add(10);
+        List<Integer> newRemainingCapStonesList = new ArrayList<>();
+        newRemainingCapStonesList.add(0);
+        newRemainingCapStonesList.add(0);
+        return Tak.GameState.newBuilder()
+                .setBoardLength(boardLength)
+                .addAllRemainingStones(newRemainingStonesList)
+                .addAllRemainingCapstones(newRemainingCapStonesList)
                 .addAllBoard(board)
                 .build();
     }

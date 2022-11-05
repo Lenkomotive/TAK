@@ -23,7 +23,7 @@ public class Main {
 
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 5;
+    private static int BOARD_LENGTH = 8;
     private static final int TIMEOUT = 10;
 
     private static Client client;
@@ -32,7 +32,6 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
-        MinMax.playSmartMove(null);
         client = new Client();
         for (int i = 0; i < 1; i++) {
             turnCount = 0;
@@ -129,7 +128,6 @@ public class Main {
     }
 
     private static void writeToJSON() throws InterruptedException {
-        sleep(5000);
         JSONWriter.writeGameStateToJSON(
                 client.getGameState().getTakGameState(),
                 PATH_TO_GAMES_FOLDER + currentFolderForGameStates + "/game_state_" + turnCount +  ".json",
