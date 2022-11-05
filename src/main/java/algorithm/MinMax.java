@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public final class MinMax {
 
-    public static int DEPTH = 1;
+    public static int DEPTH = 4;
 
     public static PieceColor ourColor;
     public static PieceColor opponentColor;
@@ -354,10 +354,6 @@ public final class MinMax {
     public static int evaluate(Tak.GameState state) {
         logger.info("Boards are evaluated...");
         return 0;
-    }
-    public static Tak.PlaceAction alphaBetaPrune(Tree tree) {
-        logger.info("Pruning tree and calculating best move...");
-        return null;
     }
 
     public static Tak.GameTurn playValidPlaceMove(Tak.GameState state) {

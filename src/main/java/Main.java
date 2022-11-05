@@ -23,8 +23,9 @@ public class Main {
 
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 8;
+    private static int BOARD_LENGTH = 4;
     private static final int TIMEOUT = 10;
+    private static int NUM_GAMES = 10;
 
     private static Client client;
 
@@ -33,7 +34,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
         client = new Client();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < NUM_GAMES; i++) {
             turnCount = 0;
             currentFolderForGameStates = JSONWriter.createFolderForGameStates(PATH_TO_GAMES_FOLDER);
             createMatch();
