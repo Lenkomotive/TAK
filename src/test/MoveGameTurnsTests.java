@@ -1,7 +1,7 @@
 import algorithm.MinMax;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import tak.Tak;
-import utils.Coordinates;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +11,16 @@ import java.util.Map;
 public class MoveGameTurnsTests {
     @Test
     public void calculateDirectionTest3x3_1() {
-        int boardLength = 5;
+        int expectedChildren = 12;
+        int boardLength = 4;
         List<Tak.Pile> board = createBoard(boardLength);
-        board.set(1, getCapStonePile());
-        board.set(5, getStandingStonePile());
-        board.set(7, getStandingStonePile());
+        board.set(0, getCapStonePile5());
         Tak.GameState gameState = createGameState(boardLength, board);
-        Coordinates coordinates = new Coordinates(1, 1);
-        MinMax.createAllMoveNodes(null, gameState, true);
 
-        }
+        var children = MinMax.createAllMoveNodes(null, gameState, true);
+
+        Assertions.assertEquals(12,children.size());
+    }
 
 
 
@@ -64,6 +64,12 @@ public class MoveGameTurnsTests {
                 .addPieces(getFlatStone())
                 .addPieces(getFlatStone())
                 .addPieces(getCapStone())
+                .build();
+    }
+
+    private Tak.Pile getCapStonePile5() {
+        return Tak.Pile.newBuilder()
+                .addPieces(getFlatStone())
                 .build();
     }
 

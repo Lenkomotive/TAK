@@ -97,8 +97,8 @@ public final class MinMax {
                 List<Tak.MoveAction> moveActions = createMoveActionsFromDrops(allPossibleDrops, direction);
                 for(var moveAction: moveActions) {
                     Tak.GameTurn gameTurn = createMoveGameTurn(coordinates, moveAction);
-                    //!TODO update board according to gameTurn!
-                    List<Tak.Pile> newBoard = new ArrayList<>(state.getBoardList());
+                      List<Tak.Pile> newBoard = updateBoardWithMoveAction(state, moveAction, i);
+
                     // now we can create a new state, and from this new state the next moves can be played
                     Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
                             newBoard, state.getRemainingStonesList(), state.getRemainingCapstonesList());
@@ -109,6 +109,113 @@ public final class MinMax {
         }
 
         return children;
+    }
+
+    private static List<Tak.Pile> updateBoardWithMoveAction(Tak.GameState oldState, Tak.MoveAction moveAction, int startIndex) {
+        List<Tak.Pile> newBoard = new ArrayList<>(oldState.getBoardList());
+        // extract the piecesList which is worked on to split it
+        var currentPiecesList =  newBoard.get(startIndex).getPiecesList();
+        // count how many pieces will be moved so the original pile can be split
+        int numberOfMovingPieces = 0;
+        for(var drop: moveAction.getDropsList()) numberOfMovingPieces+=drop;
+        // this is what stays at the original index
+        var leftOverPieces = currentPiecesList.subList(0, currentPiecesList.size() - numberOfMovingPieces);
+        Tak.Pile leftOverPile = Tak.Pile.newBuilder().addAllPieces(leftOverPieces).build();
+        newBoard.set(startIndex, leftOverPile);
+        // the movingPieces have to be split in the given direction according to the drops
+        var movingPieces = currentPiecesList.subList(currentPiecesList.size() - numberOfMovingPieces, currentPiecesList.size());
+        switch (moveAction.getDirection()) {
+            case NORTH -> updateBoardInNorthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+            case EAST -> updateBoardInEastDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+            case SOUTH -> updateBoardInSouthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+            case WEST -> updateBoardInWestDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+        }
+        return newBoard;
+    }
+
+    private static void updateBoardInNorthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces,
+                                                    List<Tak.Pile> newBoard, List<Integer> drops) {
+        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+        List<Tak.Pile> oldBoard = oldState.getBoardList();
+        int movingPiecesIndex = 0;
+        int x = startCoordinates.X;
+        int y = startCoordinates.Y - 1;
+        for(var drop: drops) {
+            int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
+            List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
+            for(int i = 0; i < drop; i++) {
+                updatedPile.add(movingPieces.get(movingPiecesIndex));
+                movingPiecesIndex++;
+            }
+            newBoard.set(nextIndex, Tak.Pile.newBuilder().addAllPieces(updatedPile).build());
+            y--;
+        }
+    }
+
+    private static void updateBoardInEastDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops) {
+        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+        List<Tak.Pile> oldBoard = oldState.getBoardList();
+        int movingPiecesIndex = 0;
+        int x = startCoordinates.X + 1;
+        int y = startCoordinates.Y;
+        for(var drop: drops) {
+            int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
+            List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
+            for(int i = 0; i < drop; i++) {
+                updatedPile.add(movingPieces.get(movingPiecesIndex));
+                movingPiecesIndex++;
+            }
+            newBoard.set(nextIndex, Tak.Pile.newBuilder().addAllPieces(updatedPile).build());
+            x++;
+        }
+    }
+
+    private static void updateBoardInSouthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops) {
+        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+        List<Tak.Pile> oldBoard = oldState.getBoardList();
+        int movingPiecesIndex = 0;
+        int x = startCoordinates.X;
+        int y = startCoordinates.Y + 1;
+        for(var drop: drops) {
+            int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
+            List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
+            for(int i = 0; i < drop; i++) {
+                updatedPile.add(movingPieces.get(movingPiecesIndex));
+                movingPiecesIndex++;
+            }
+            newBoard.set(nextIndex, Tak.Pile.newBuilder().addAllPieces(updatedPile).build());
+            y++;
+        }
+    }
+
+    private static void updateBoardInWestDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops) {
+        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+        List<Tak.Pile> oldBoard = oldState.getBoardList();
+        int movingPiecesIndex = 0;
+        int x = startCoordinates.X - 1;
+        int y = startCoordinates.Y;
+        for(var drop: drops) {
+            //movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldBoard, movingPiecesIndex, x, y, drop);
+            int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
+            List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
+            for(int i = 0; i < drop; i++) {
+                updatedPile.add(movingPieces.get(movingPiecesIndex));
+                movingPiecesIndex++;
+            }
+            newBoard.set(nextIndex, Tak.Pile.newBuilder().addAllPieces(updatedPile).build());
+            x--;
+        }
+    }
+
+    private static int addDropsToBoard(Tak.GameState oldState, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Tak.Pile> oldBoard, int movingPiecesIndex, int x, int y, Integer drop) {
+        int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
+        List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
+        for(int i = 0; i < drop; i++) {
+            updatedPile.add(movingPieces.get(movingPiecesIndex));
+            movingPiecesIndex++;
+        }
+        newBoard.set(nextIndex, Tak.Pile.newBuilder().addAllPieces(updatedPile).build());
+        return movingPiecesIndex;
     }
 
     private static Tak.GameTurn createMoveGameTurn(Coordinates coordinates, Tak.MoveAction moveAction) {
