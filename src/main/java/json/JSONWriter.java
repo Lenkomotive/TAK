@@ -39,17 +39,28 @@ public class JSONWriter {
         for (Tak.Pile pile: state.getBoardList()) {
             JsonArrayBuilder pileArray = Json.createArrayBuilder();
             int position = 0;
-            for(Tak.Piece piece: pile.getPiecesList()) {
-                PieceColor color = piece.getSecondPlayerOwned()? PieceColor.BLACK : PieceColor.WHITE;
+            if(pile.getPiecesList().isEmpty()) {
                 JsonObjectBuilder pieceBuilder = Json.createObjectBuilder();
                 pieceBuilder
                         .add("x", x)
                         .add("y", y)
-                        .add("position_in_pile", position)
-                        .add("piece_type", piece.getTypeValue())
-                        .add("piece_color", color.ordinal());
+                        .add("position_in_pile", -1)
+                        .add("piece_type", -1)
+                        .add("piece_color", -1);
                 pileArray.add(pieceBuilder);
-                position++;
+            } else {
+                for(Tak.Piece piece: pile.getPiecesList()) {
+                    PieceColor color = piece.getSecondPlayerOwned()? PieceColor.BLACK : PieceColor.WHITE;
+                    JsonObjectBuilder pieceBuilder = Json.createObjectBuilder();
+                    pieceBuilder
+                            .add("x", x)
+                            .add("y", y)
+                            .add("position_in_pile", position)
+                            .add("piece_type", piece.getTypeValue())
+                            .add("piece_color", color.ordinal());
+                    pileArray.add(pieceBuilder);
+                    position++;
+                }
             }
             x++;
             if(x == state.getBoardLength()) {
@@ -99,4 +110,13 @@ public class JSONWriter {
          Files.createDirectories(Paths.get(pathToFolder + folderName));
          return folderName;
      }
+
+    public static String createFolderForDebugGameStates(String pathToFolder) throws IOException {
+        long count = Files.find(Paths.get(pathToFolder),1,
+                (path, attributes) -> attributes.isDirectory()
+        ).count() - 1;
+        String folderName = "debug_" + count;
+        Files.createDirectories(Paths.get(pathToFolder + folderName));
+        return folderName;
+    }
 }

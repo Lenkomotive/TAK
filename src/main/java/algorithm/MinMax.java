@@ -375,7 +375,7 @@ public final class MinMax {
         return coordinates;
     }
 
-    private static List<List<Integer>> getAllPossibleDrops(int fieldCount, int carryLimit) {
+    public static List<List<Integer>> getAllPossibleDrops(int fieldCount, int carryLimit) {
         List<List<Integer>> allPossibleDrops = new ArrayList<>();
         for(int pieceCount = 1; pieceCount <= carryLimit; pieceCount++) {
             List<List<Integer>> partitions = PartitionHelper.getAllPartitions(pieceCount);

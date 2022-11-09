@@ -25,7 +25,7 @@ public class Main {
     private static final String GAME_TOKEN = "tak";
     private static int BOARD_LENGTH = 4;
     private static final int TIMEOUT = 10;
-    private static int NUM_GAMES = 10;
+    private static int NUM_GAMES = 100;
 
     private static Client client;
 
@@ -97,7 +97,7 @@ public class Main {
                 turn = MinMax.playFirstMove(state);
                 firstMove = false;
             } else {
-                MinMax.playSmartMove(state);
+                //MinMax.playSmartMove(state);
                 turn = MinMax.playValidPlaceMove(state);
             }
 
