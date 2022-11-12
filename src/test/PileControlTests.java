@@ -1,4 +1,4 @@
-import algorithm.MinMax;
+import algorithm.MoveGenerator;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import tak.Tak;
@@ -13,9 +13,9 @@ public class PileControlTests {
         boolean min = true;
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(false).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
-        MinMax.ourColor = PieceColor.WHITE;
+        MoveGenerator.ourColor = PieceColor.WHITE;
 
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -27,8 +27,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(false).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.BLACK;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.BLACK;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -40,8 +40,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(true).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.WHITE;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.WHITE;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -53,8 +53,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(true).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.BLACK;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.BLACK;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -67,8 +67,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(false).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.WHITE;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.WHITE;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -80,8 +80,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(false).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.BLACK;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.BLACK;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -93,8 +93,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(true).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.WHITE;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.WHITE;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }
@@ -106,8 +106,8 @@ public class PileControlTests {
         Tak.Piece piece = Tak.Piece.newBuilder().setSecondPlayerOwned(true).build();
         Tak.Pile pile = Tak.Pile.newBuilder().addPieces(piece).build();
 
-        MinMax.ourColor = PieceColor.BLACK;
-        boolean result = MinMax.pileIsUnderControl(pile, min);
+        MoveGenerator.ourColor = PieceColor.BLACK;
+        boolean result = MoveGenerator.pileIsUnderControl(pile, min);
 
         Assert.assertEquals(expected, result);
     }

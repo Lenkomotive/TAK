@@ -1,4 +1,4 @@
-import algorithm.MinMax;
+import algorithm.MoveGenerator;
 import algorithm.Tree;
 import json.JSONWriter;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class CreateMovingGameTurnNodesTest {
         boolean min = true;
         Tree tree = new Tree(originState);
         //min
-        tree.root.children.addAll(MinMax.createAllMoveNodes(tree.root, originState, min));
+        tree.root.children.addAll(MoveGenerator.createAllMoveNodes(tree.root, originState, min));
 
         int counter = 0;
         for(var node :tree.root.children) {

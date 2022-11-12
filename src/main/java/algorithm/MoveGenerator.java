@@ -9,27 +9,26 @@ import utils.PieceColor;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class MinMax {
+public final class MoveGenerator {
 
-    public static int DEPTH = 2;
+    public static int TREE_DEPTH;
 
     public static PieceColor ourColor;
     public static PieceColor opponentColor;
 
-    private static final Logger logger = LogManager.getLogger(MinMax.class);
+    private static final Logger logger = LogManager.getLogger(MoveGenerator.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
-        boolean min = true;
         Tree tree = new Tree(state);
         printBoard(state);
         //min
-        tree.root.children.addAll(createAllPlaceNodes(tree.root, state, min));
-        tree.root.children.addAll(createAllMoveNodes(tree.root, state, min));
-        logger.info("created Nodes: " +tree.root.children.size() + " on min = " + min);
-        min = false;
-        //max
+        tree.root.children.addAll(createAllPlaceNodes(tree.root, state, true));
+        tree.root.children.addAll(createAllMoveNodes(tree.root, state, true));
+        logger.info("created Nodes: " +tree.root.children.size() + " on min = " + true);
+        boolean min = false;
+
         int counter = 0;
         List<Node> children = tree.root.children;
-        for (int i = 0; i < DEPTH; i++) {
+        for (int i = 0; i < TREE_DEPTH - 1; i++) {
             List<Node> newChildren = new ArrayList<>();
             for(var child: children) {
                 child.children.addAll(createAllPlaceNodes(child, child.currentState, min));
@@ -279,8 +278,6 @@ public final class MinMax {
         directions.put(Tak.Direction.EAST, maxMoveToEast);
         directions.put(Tak.Direction.SOUTH, maxMoveToSouth);
         directions.put(Tak.Direction.WEST, maxMoveToWest);
-
-
         return directions;
     }
 
@@ -291,7 +288,6 @@ public final class MinMax {
         }
         return false;
     }
-
 
     private static int translateCoordinateToIndex(int boardLength, Coordinates coordinates) {
         int index = coordinates.Y * boardLength + coordinates.X;
@@ -346,11 +342,6 @@ public final class MinMax {
                 .setY(coordinates.Y)
                 .setPlace(placeAction)
                 .build();
-    }
-
-    public static int evaluate(Tak.GameState state) {
-        logger.info("Boards are evaluated...");
-        return 0;
     }
 
     public static Tak.GameTurn playValidPlaceMove(Tak.GameState state) {

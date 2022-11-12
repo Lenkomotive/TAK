@@ -1,4 +1,4 @@
-import algorithm.MinMax;
+import algorithm.MoveGenerator;
 import client.Client;
 import json.JSONWriter;
 import netcode.Netcode;
@@ -15,24 +15,29 @@ import static java.lang.Thread.sleep;
 public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
 
-    private static int SLEEP_MS = 1000;
+    private static final int SLEEP_MS = 1000;
 
-    private static String PATH_TO_GAMES_FOLDER = "src/main/java/json/games/";
+    // JSON
+    private static final String PATH_TO_GAMES_FOLDER = "src/main/java/json/games/";
     private static String currentFolderForGameStates;
     private static int turnCount;
 
+    // Network
     private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
     private static final String GAME_TOKEN = "tak";
-    private static int BOARD_LENGTH = 4;
+
+    // Game parameter
+    private static final int BOARD_LENGTH = 3;
     private static final int TIMEOUT = 10;
-    private static int NUM_GAMES = 100;
+    private static final int NUM_GAMES = 100;
+    public static final int TREE_DEPTH = 5;
 
     private static Client client;
-
     private static boolean beginningPlayer;
 
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
+        MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
         for (int i = 0; i < NUM_GAMES; i++) {
             turnCount = 0;
@@ -50,9 +55,9 @@ public class Main {
         beginningPlayer = response.getBeginningPlayer();
         logger.info("Beginning player: " + beginningPlayer);
 
-        MinMax.ourColor = beginningPlayer? PieceColor.WHITE : PieceColor.BLACK;
-        MinMax.opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
-        logger.info("our color: " + MinMax.ourColor);
+        MoveGenerator.ourColor = beginningPlayer? PieceColor.WHITE : PieceColor.BLACK;
+        MoveGenerator.opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
+        logger.info("our color: " + MoveGenerator.ourColor);
 
         String matchToken = response.getMatchToken();
         logger.info("Match token: " + matchToken);
@@ -94,13 +99,12 @@ public class Main {
             Tak.GameState state = client.getGameState().getTakGameState();
             writeToJSON(state);
             if(firstMove) {
-                turn = MinMax.playFirstMove(state);
+                turn = MoveGenerator.playFirstMove(state);
                 firstMove = false;
             } else {
-                //MinMax.playSmartMove(state);
-                turn = MinMax.playValidPlaceMove(state);
+                MoveGenerator.playSmartMove(state);
+                turn = MoveGenerator.playValidPlaceMove(state);
             }
-
             playTurn(turn);
         }
         logger.info("Match ended with status: " + client.getGameState().getGameStatus());

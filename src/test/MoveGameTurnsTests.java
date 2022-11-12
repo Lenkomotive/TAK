@@ -1,4 +1,4 @@
-import algorithm.MinMax;
+import algorithm.MoveGenerator;
 import org.junit.jupiter.api.Test;
 import tak.Tak;
 import utils.PieceColor;
@@ -18,9 +18,9 @@ public class MoveGameTurnsTests {
         Tak.GameState gameState = createGameState3x3(boardLength, board);
 
 
-        MinMax.ourColor = PieceColor.WHITE;
-        MinMax.opponentColor = PieceColor.BLACK;
-        var children = MinMax.playSmartMove(gameState);
+        MoveGenerator.ourColor = PieceColor.WHITE;
+        MoveGenerator.opponentColor = PieceColor.BLACK;
+        var children = MoveGenerator.playSmartMove(gameState);
 
     }
 
