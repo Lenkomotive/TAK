@@ -27,9 +27,9 @@ public class Main {
     private static final String GAME_TOKEN = "tak";
 
     // Game parameter
-    private static final int BOARD_LENGTH = 3;
+    private static final int BOARD_LENGTH = 4;
     private static final int TIMEOUT = 10;
-    private static final int NUM_GAMES = 100;
+    private static final int NUM_GAMES = 1;
     public static final int TREE_DEPTH = 5;
 
     private static Client client;

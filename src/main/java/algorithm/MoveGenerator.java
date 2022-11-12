@@ -12,39 +12,47 @@ import java.util.stream.Collectors;
 public final class MoveGenerator {
 
     public static int TREE_DEPTH;
+    public static final String BAKI = "ᴮᵃᵏᶤ ᶤˢ ᶢᵃʸ";
 
     public static PieceColor ourColor;
     public static PieceColor opponentColor;
 
     private static final Logger logger = LogManager.getLogger(MoveGenerator.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
-        Tree tree = new Tree(state);
         printBoard(state);
+        Tree tree = new Tree(state);
+        logger.info("Created: 1 node | Depth: 0 | Level: MAX");
         //min
         tree.root.children.addAll(createAllPlaceNodes(tree.root, state, true));
         tree.root.children.addAll(createAllMoveNodes(tree.root, state, true));
-        logger.info("created Nodes: " +tree.root.children.size() + " on min = " + true);
+        logger.info("Created: " + tree.root.children.size() + " nodes | Depth: 1 | Level: MIN");
         boolean min = false;
 
-        int counter = 0;
+
         List<Node> children = tree.root.children;
-        for (int i = 0; i < TREE_DEPTH - 1; i++) {
+        for (int depth = 2; depth <= TREE_DEPTH ; depth++) {
             List<Node> newChildren = new ArrayList<>();
+            int counter = 0;
             for(var child: children) {
                 child.children.addAll(createAllPlaceNodes(child, child.currentState, min));
                 child.children.addAll(createAllMoveNodes(child, child.currentState, min));
                 newChildren.addAll(child.children);
                 counter += child.children.size();
+                System.out.print("\r Created " + counter +  " nodes! " + BAKI);
             }
-            logger.info("created Nodes: " + counter + " on min = " + min );
+            System.out.println();
+            logger.info("Created: " + counter + " nodes | Depth: "+ depth + " | Level: "+ (min? "MIN":"MAX"));
             children = newChildren;
             min = !min;
         }
-//        for(var child: children) {
-//            printBoard(child.currentState);
+//        int c = 0;
+//        Node node = children.get(0);
+//        while (node.parent != null) {
+//            JSONWriter.writeGameStateToJSON(node.currentState, "src/main/java/json/games/game_state_" + c + ".json" ,  true);
+//            node = node.parent;
+//            c++;
 //        }
-
-        int i  = 0;
+//        JSONWriter.writeGameStateToJSON(node.currentState, "src/main/java/json/games/game_state_" + c + ".json" ,  true);
         return null;
     }
 
@@ -409,3 +417,7 @@ public final class MoveGenerator {
         return createPlaceGameTurn(state.getBoardLength(), index, placeAction);
     }
 }
+
+
+
+
