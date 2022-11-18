@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class CreateBoard {
+
     private static final String PATH_TO_GAMES_FOLDER = "src/main/java/json/debug/";
 
     @Test
@@ -20,13 +21,6 @@ public class CreateBoard {
         board.add(5, CreateBoardHelper.getCapStonePile(4,true));
         board.add(6, CreateBoardHelper.getCapStonePile(1,false));
         Tak.GameState state = CreateBoardHelper.createGameState(boardLength, board);
-        writeToJSON(state, true, folderName, 0);
-    }
-
-    private static void writeToJSON(Tak.GameState gameState, boolean beginningPlayer, String folderName, int stateNumber) {
-        JSONWriter.writeGameStateToJSON(
-                gameState,
-                PATH_TO_GAMES_FOLDER + folderName + "/debug_" + stateNumber +  ".json",
-                beginningPlayer);
+        CreateBoardHelper.writeToJSON(state, true, folderName, 0);
     }
 }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class AlphaBetaPruningTest {
+
     @Test
     public void alphaBetaPruneTest() {
         Node child25 = new Node(null,true,null,null);

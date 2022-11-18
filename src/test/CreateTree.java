@@ -31,17 +31,10 @@ public class CreateTree {
 
         int counter = 0;
         for(var node :tree.root.children) {
-            writeToJSON(originState, beggingPlayer, folderName, counter);
+            CreateBoardHelper.writeToJSON(originState, beggingPlayer, folderName, counter);
             counter++;
-            writeToJSON(node.currentState, beggingPlayer, folderName, counter);
+            CreateBoardHelper.writeToJSON(node.currentState, beggingPlayer, folderName, counter);
             counter++;
         }
-    }
-
-    private static void writeToJSON(Tak.GameState gameState, boolean beginningPlayer, String folderName, int stateNumber) {
-        JSONWriter.writeGameStateToJSON(
-                gameState,
-                PATH_TO_GAMES_FOLDER + folderName + "/debug_" + stateNumber +  ".json",
-                beginningPlayer);
     }
 }

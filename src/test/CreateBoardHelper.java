@@ -1,9 +1,12 @@
+import json.JSONWriter;
 import tak.Tak;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CreateBoardHelper {
+    private static final String PATH_TO_GAMES_FOLDER = "src/main/java/json/debug/";
+
     public static List<Tak.Pile> createBoard(int boardLength) {
         List<Tak.Pile> board = new ArrayList<>();
         for (int i = 0; i < boardLength * boardLength; i++) {
@@ -75,4 +78,12 @@ public class CreateBoardHelper {
                 .addAllBoard(board)
                 .build();
     }
+
+    public static void writeToJSON(Tak.GameState gameState, boolean beginningPlayer, String folderName, int stateNumber) {
+        JSONWriter.writeGameStateToJSON(
+                gameState,
+                PATH_TO_GAMES_FOLDER + folderName + "/game_state_" + stateNumber +  ".json",
+                beginningPlayer);
+    }
+
 }

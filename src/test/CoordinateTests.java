@@ -5,7 +5,6 @@ import utils.Coordinates;
 
 public class CoordinateTests {
 
-
     @Test
     void givenIndexAndBoardLength1() {
         int index = 0;
