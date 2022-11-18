@@ -27,9 +27,9 @@ public class Main {
     private static final String GAME_TOKEN = "tak";
 
     // Game parameter
-    private static final int BOARD_LENGTH = 4;
+    private static final int BOARD_LENGTH = 3;
     private static final int TIMEOUT = 10;
-    private static final int NUM_GAMES = 1;
+    private static final int NUM_GAMES = 100;
     public static final int TREE_DEPTH = 5;
 
     private static Client client;
@@ -47,7 +47,32 @@ public class Main {
             checkOpponentInfo();
             checkAgreedTimeout();
             gameLoop();
+            logger.debug(i+1);
         }
+    }
+
+    private static void gameLoop() throws InterruptedException {
+        boolean firstMove = true;
+        while(matchIsRunning()) {
+            if(itIsOpponentsTurn()) {
+                logger.info("Opponents turn, let's wait...");
+                sleep(SLEEP_MS);
+                continue;
+            }
+            Tak.GameTurn turn = null;
+            Tak.GameState state = client.getGameState().getTakGameState();
+            writeToJSON(state);
+            if(firstMove) {
+                turn = MoveGenerator.playFirstMove(state);
+                firstMove = false;
+            } else {
+//                MoveGenerator.playSmartMove(state);
+                turn = MoveGenerator.playValidPlaceMove(state);
+            }
+            playTurn(turn);
+        }
+        logger.info("Match ended with status: " + client.getGameState().getGameStatus());
+        logger.info("-----------------------------------------------------------------");
     }
 
     private static void createMatch() {
@@ -85,30 +110,6 @@ public class Main {
 
     private static void checkAgreedTimeout() {
         logger.info("Agreed timeout: " + client.getTimeout());
-    }
-
-    private static void gameLoop() throws InterruptedException {
-        boolean firstMove = true;
-        while(matchIsRunning()) {
-            if(itIsOpponentsTurn()) {
-                logger.info("Opponents turn, let's wait...");
-                sleep(SLEEP_MS);
-                continue;
-            }
-            Tak.GameTurn turn = null;
-            Tak.GameState state = client.getGameState().getTakGameState();
-            writeToJSON(state);
-            if(firstMove) {
-                turn = MoveGenerator.playFirstMove(state);
-                firstMove = false;
-            } else {
-                MoveGenerator.playSmartMove(state);
-                turn = MoveGenerator.playValidPlaceMove(state);
-            }
-            playTurn(turn);
-        }
-        logger.info("Match ended with status: " + client.getGameState().getGameStatus());
-        logger.info("-----------------------------------------------------------------");
     }
 
     private static boolean matchIsRunning() {
