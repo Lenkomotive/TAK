@@ -5,8 +5,8 @@
     "board_length":8,
     "remaining_capstones_white":2,
     "remaining_capstones_black":2,
-    "remaining_stones_white":50,
-    "remaining_stones_black":49,
+    "remaining_stones_white":44,
+    "remaining_stones_black":44,
     "board":[
         [
             {
@@ -30,9 +30,9 @@
             {
                 "x":2,
                 "y":0,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":1
             }
         ],
         [
@@ -48,36 +48,36 @@
             {
                 "x":4,
                 "y":0,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":1
             }
         ],
         [
             {
                 "x":5,
                 "y":0,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":0
             }
         ],
         [
             {
                 "x":6,
                 "y":0,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":1
             }
         ],
         [
             {
                 "x":7,
                 "y":0,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":1
             }
         ],
         [
@@ -93,9 +93,9 @@
             {
                 "x":1,
                 "y":1,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":1
             }
         ],
         [
@@ -138,9 +138,9 @@
             {
                 "x":6,
                 "y":1,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":0
             }
         ],
         [
@@ -318,9 +318,9 @@
             {
                 "x":2,
                 "y":4,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":0
             }
         ],
         [
@@ -444,9 +444,9 @@
             {
                 "x":0,
                 "y":6,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":0
             }
         ],
         [
@@ -543,9 +543,9 @@
             {
                 "x":3,
                 "y":7,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":0
             }
         ],
         [
@@ -579,9 +579,9 @@
             {
                 "x":7,
                 "y":7,
-                "position_in_pile":-1,
-                "piece_type":-1,
-                "piece_color":-1
+                "position_in_pile":0,
+                "piece_type":0,
+                "piece_color":0
             }
         ]
     ]

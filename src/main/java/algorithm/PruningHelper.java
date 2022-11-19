@@ -1,26 +1,32 @@
 package algorithm;
 
+import utils.PruneNode;
+
+import java.util.Map;
+
 public class PruningHelper {
-    public static int alphaBetaPrune(Node node, int alpha, int beta) {
+    public static PruneNode alphaBetaPrune(Node node, float alpha, float beta) {
         if(node.children.size() == 0) {
-            return node.val;
+            return new PruneNode(node, node.val);
         }
         if(node.min) {
+            PruneNode betaPruneNode = new PruneNode(node, beta);
             for(var child: node.children) {
-                beta = Math.min(beta, alphaBetaPrune(child, alpha, beta));
-                if(beta <= alpha) {
-                    return alpha;
+                betaPruneNode = PruneNode.min(betaPruneNode, alphaBetaPrune(child, alpha, beta));
+                if(betaPruneNode.getVal() <= alpha) {
+                    return new PruneNode(child, alpha);
                 }
             }
-            return beta;
+            return betaPruneNode;
         } else {
+            PruneNode alphaPruneNode = new PruneNode(node, alpha);
             for(var child: node.children) {
-                alpha = Math.max(alpha, alphaBetaPrune(child, alpha, beta));
+                alphaPruneNode = PruneNode.max(alphaPruneNode, alphaBetaPrune(child, alpha, beta));
                 if(beta <= alpha) {
-                    return beta;
+                    return new PruneNode(child, beta);
                 }
             }
-            return alpha;
+            return alphaPruneNode;
         }
     }
 }

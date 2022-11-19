@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import tak.Tak;
 import utils.Coordinates;
 import utils.PieceColor;
+import utils.PruneNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,15 +46,27 @@ public final class MoveGenerator {
             children = newChildren;
             min = !min;
         }
-//        int c = 0;
-//        Node node = children.get(0);
-//        while (node.parent != null) {
-//            JSONWriter.writeGameStateToJSON(node.currentState, "src/main/java/json/games/game_state_" + c + ".json" ,  true);
-//            node = node.parent;
-//            c++;
-//        }
-//        JSONWriter.writeGameStateToJSON(node.currentState, "src/main/java/json/games/game_state_" + c + ".json" ,  true);
-        return null;
+        Evaluator evaluator = new Evaluator();
+
+        float MAX = 0.0f;
+        float MIN = 0.0f;
+        for(var child : children) {
+            child.val = 0.0f;
+            child.val = evaluator.getEvalCaptured(child.currentState, ourColor) + evaluator.getEvalComposition(child.currentState, ourColor);
+            if(child.val > MAX) MAX = child.val;
+            if(child.val < MIN) MIN = child.val;
+        }
+
+        PruneNode alphaBetaResult = PruningHelper.alphaBetaPrune(tree.root, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+        Node finalMove = alphaBetaResult.getNode();
+        for (int i = 0; i < TREE_DEPTH - 1; i++) {
+            finalMove = finalMove.parent;
+        }
+
+        logger.info("AlphaBetaPruning evaluation: " + alphaBetaResult.getVal());
+        logger.info("MAX: "  + MAX);
+        logger.info("MIN: "  + MIN);
+        return finalMove.gameTurn;
     }
 
 

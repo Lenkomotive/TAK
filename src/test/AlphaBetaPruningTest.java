@@ -54,7 +54,7 @@ public class AlphaBetaPruningTest {
         tree.root.children.get(2).children.get(0).children.add(child47);
         tree.root.children.get(2).children.get(1).children.add(child34);
         tree.root.children.get(2).children.get(1).children.add(child22);
-        Assertions.assertEquals(34, PruningHelper.alphaBetaPrune(tree.root, -1000, 1000));
+        Assertions.assertEquals(34, PruningHelper.alphaBetaPrune(tree.root, -1000, 1000).getVal());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class AlphaBetaPruningTest {
         tree.root.children.get(2).children.get(0).children.add(child31);
         tree.root.children.get(2).children.get(1).children.add(child32);
         tree.root.children.get(2).children.get(1).children.add(child44);
-        Assertions.assertEquals(13, PruningHelper.alphaBetaPrune(tree.root, -1000, 1000));
+        Assertions.assertEquals(13, PruningHelper.alphaBetaPrune(tree.root, -1000, 1000).getVal());
     }
 
 }

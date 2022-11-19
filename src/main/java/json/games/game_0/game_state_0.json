@@ -1,12 +1,12 @@
 
 {
-    "our_piece_color":1,
-    "opponent_piece_color":0,
+    "our_piece_color":0,
+    "opponent_piece_color":1,
     "board_length":4,
     "remaining_capstones_white":0,
     "remaining_capstones_black":0,
     "remaining_stones_white":15,
-    "remaining_stones_black":14,
+    "remaining_stones_black":15,
     "board":[
         [
             {
@@ -57,9 +57,9 @@
             {
                 "x":1,
                 "y":1,
-                "position_in_pile":0,
-                "piece_type":0,
-                "piece_color":1
+                "position_in_pile":-1,
+                "piece_type":-1,
+                "piece_color":-1
             }
         ],
         [

@@ -24,10 +24,10 @@ public class Main {
 
     // Game parameter
     private static final int BOARD_LENGTH = 8;
-    private static final int TIMEOUT = 10;
-    private static final int NUM_GAMES = 2;
-    public static final int TREE_DEPTH = 5;
-    private static String OPPONENT = "";
+    private static final int TIMEOUT = 20;
+    private static final int NUM_GAMES = 1;
+    public static int TREE_DEPTH = 3;
+    private static String OPPONENT = "lenk";
 
     private static Client client;
     private static boolean beginningPlayer;
@@ -62,11 +62,13 @@ public class Main {
                 turn = MoveGenerator.playFirstMove(state);
                 firstMove = false;
             } else {
-//                MoveGenerator.playSmartMove(state);
-                turn = MoveGenerator.playValidPlaceMove(state);
+              turn =   MoveGenerator.playSmartMove(state);
+//                turn = MoveGenerator.playValidPlaceMove(state);
             }
             playTurn(turn);
         }
+        Tak.GameState state = client.getGameState().getTakGameState();
+        writeToJSON(state);
         logger.info("Match ended with status: " + client.getGameState().getGameStatus());
         logger.info("-----------------------------------------------------------------");
     }
@@ -91,6 +93,11 @@ public class Main {
         client.initMatchIDPacket(matchToken);
 
         int boardLength = client.getGameState().getTakGameState().getBoardLength();
+
+        if(boardLength > 6) {
+            TREE_DEPTH = 3;
+            MoveGenerator.TREE_DEPTH = TREE_DEPTH;
+        }
         logger.info("Playing on a " + boardLength+ "x" + boardLength + " Board");
     }
 

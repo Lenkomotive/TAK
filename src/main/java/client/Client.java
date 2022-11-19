@@ -14,7 +14,7 @@ public class Client {
     private final String HOST = "gameserver.ist.tugraz.at";
     private final int PORT = 80;
 
-    private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
+    private static final String USER_TOKEN = "0257a1c7ca11b86ced99b145be9fe470e97ef255f3ebd8d49314d7dc34abc797";
     private static final String GAME_TOKEN = "tak";
 
     private final GameComGrpc.GameComBlockingStub stub;

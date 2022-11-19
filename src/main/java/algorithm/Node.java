@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Node {
     public boolean min;
-    public int val;
+    public float val;
     public Node parent;
     public Tak.GameTurn gameTurn;
     public Tak.GameState currentState;
