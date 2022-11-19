@@ -22,15 +22,12 @@ public class Main {
     private static String currentFolderForGameStates;
     private static int turnCount;
 
-    // Network
-    private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
-    private static final String GAME_TOKEN = "tak";
-
     // Game parameter
-    private static final int BOARD_LENGTH = 3;
+    private static final int BOARD_LENGTH = 8;
     private static final int TIMEOUT = 10;
-    private static final int NUM_GAMES = 100;
+    private static final int NUM_GAMES = 2;
     public static final int TREE_DEPTH = 5;
+    private static String OPPONENT = "";
 
     private static Client client;
     private static boolean beginningPlayer;
@@ -47,7 +44,6 @@ public class Main {
             checkOpponentInfo();
             checkAgreedTimeout();
             gameLoop();
-            logger.debug(i+1);
         }
     }
 
@@ -76,7 +72,13 @@ public class Main {
     }
 
     private static void createMatch() {
-        Netcode.MatchResponse response = client.createMatchRequest(BOARD_LENGTH, USER_TOKEN, GAME_TOKEN, TIMEOUT);
+
+        Netcode.MatchResponse response;
+        if(OPPONENT.equals("")) {
+            response = client.createMatchRequest(BOARD_LENGTH, TIMEOUT);
+        } else {
+            response = client.createDirectMatchRequest(BOARD_LENGTH, TIMEOUT, OPPONENT);
+        }
         beginningPlayer = response.getBeginningPlayer();
         logger.info("Beginning player: " + beginningPlayer);
 
@@ -86,7 +88,7 @@ public class Main {
 
         String matchToken = response.getMatchToken();
         logger.info("Match token: " + matchToken);
-        client.initMatchIDPacket(USER_TOKEN, matchToken);
+        client.initMatchIDPacket(matchToken);
 
         int boardLength = client.getGameState().getTakGameState().getBoardLength();
         logger.info("Playing on a " + boardLength+ "x" + boardLength + " Board");
@@ -103,8 +105,10 @@ public class Main {
     private static void checkOpponentInfo() {
         Netcode.OpponentInfoResponse opponentInfoResponse = client.getOpponentInfo();
         logger.info("We are playing against: "
+                + opponentInfoResponse.getUserPseudonym()
+                + " from Group: "
                 + opponentInfoResponse.getGroupPseudonym()
-                + ", with a ELO value of: "
+                + ", ELO: "
                 + opponentInfoResponse.getElo().getGroupElo());
     }
 

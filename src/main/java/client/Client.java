@@ -14,21 +14,23 @@ public class Client {
     private final String HOST = "gameserver.ist.tugraz.at";
     private final int PORT = 80;
 
-    private final ManagedChannel channel;
+    private static final String USER_TOKEN = "5d358d3a9ff2c036e7656d137d75723f8879f8c751350ddf62cb12ea02946a0d";
+    private static final String GAME_TOKEN = "tak";
+
     private final GameComGrpc.GameComBlockingStub stub;
 
     private Netcode.MatchIDPacket matchIDPacket;
 
     public Client() {
-        channel = ManagedChannelBuilder.forAddress(HOST, PORT)
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(HOST, PORT)
                 .usePlaintext()
                 .build();
         stub = GameComGrpc.newBlockingStub(channel);
     }
 
-    public void initMatchIDPacket(String userToken, String matchToken) {
+    public void initMatchIDPacket(String matchToken) {
         matchIDPacket = Netcode.MatchIDPacket.newBuilder()
-                .setUserToken(userToken)
+                .setUserToken(USER_TOKEN)
                 .setMatchToken(matchToken)
                 .build();
     }
@@ -45,13 +47,36 @@ public class Client {
         return stub.getOpponentInfo(matchIDPacket);
     }
 
-    public Netcode.MatchResponse createMatchRequest(int boardLength, String userToken, String gameToken, int timeout) {
+    public Netcode.MatchResponse createMatchRequest(int boardLength,  int timeout) {
         Tak.GameParameter gameParameter = Tak.GameParameter.newBuilder()
                 .setBoardLength(boardLength)
                 .build();
         Netcode.MatchRequest request  = Netcode.MatchRequest.newBuilder()
-                .setUserToken(userToken)
-                .setGameToken(gameToken)
+                .setUserToken(USER_TOKEN)
+                .setGameToken(GAME_TOKEN)
+                .setTimeoutSuggestionSeconds(timeout)
+                .setTakGameParameters(gameParameter)
+                .build();
+        return stub.newMatch(request);
+    }
+
+    public Netcode.MatchResponse createDirectMatchRequest(int boardLength, int timeout, String opponent) {
+        Tak.GameParameter gameParameter = Tak.GameParameter.newBuilder()
+                .setBoardLength(boardLength)
+                .build();
+
+        Netcode.DirectChallenge directChallenge = Netcode.DirectChallenge.newBuilder()
+                .setUserPseudonym(opponent)
+                .build();
+
+        Netcode.MatchmakingParameter matchmakingParameter = Netcode.MatchmakingParameter.newBuilder()
+                .setDirectMatchmaking(directChallenge)
+                .build();
+
+        Netcode.MatchRequest request  = Netcode.MatchRequest.newBuilder()
+                .setUserToken(USER_TOKEN)
+                .setGameToken(GAME_TOKEN)
+                .setMatchmakingParameters(matchmakingParameter)
                 .setTimeoutSuggestionSeconds(timeout)
                 .setTakGameParameters(gameParameter)
                 .build();
@@ -79,4 +104,22 @@ public class Client {
         Netcode.SetPseudonymResponse response =  stub.setGroupPseudonym(request);
         logger.info(response.getErrorCode());
     }
+
+    public void setUserPseudonym() {
+        Netcode.AuthPacket authPacket = Netcode.AuthPacket.newBuilder()
+                .setMatrNumber("matrnummer")
+                .setSecret("algopassword")
+                .build();
+
+        Netcode.SetPseudonymRequest request =  Netcode.SetPseudonymRequest.newBuilder()
+                .setAuth(authPacket)
+                .setPseudonym("")
+                .build();
+        // mario: lenk
+        // hasan: hazan
+        // baki: clozopin
+        Netcode.SetPseudonymResponse response =  stub.setUserPseudonym(request);
+        logger.info(response.getErrorCode());
+    }
+
 }

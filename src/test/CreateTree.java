@@ -15,13 +15,16 @@ public class CreateTree {
     @Test
     void createTree() throws IOException {
         String folderName = JSONWriter.createFolderForDebugGameStates(PATH_TO_GAMES_FOLDER);
-        int boardLength = 4;
+        int boardLength = 6;
         MoveGenerator.ourColor = PieceColor.WHITE;
         List<Tak.Pile> board = CreateBoardHelper.createBoard(boardLength);
         board.set(4, CreateBoardHelper.getFlatStonePile(4,false));
+        board.set(16, CreateBoardHelper.getFlatStonePile(8,false));
+        board.set(24, CreateBoardHelper.getCapStonePile(5,false));
+        board.set(13, CreateBoardHelper.getStandingStonePile(7,false));
         Tak.GameState originState = CreateBoardHelper.createGameState(boardLength, board);
         Tree tree = new Tree(originState);
-
+        CreateBoardHelper.writeToJSON(originState, true, folderName, 0);
         boolean min = true;
         boolean beggingPlayer = true;
 
