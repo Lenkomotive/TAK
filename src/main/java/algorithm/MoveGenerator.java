@@ -18,6 +18,8 @@ public final class MoveGenerator {
     public static PieceColor ourColor;
     public static PieceColor opponentColor;
 
+    private static List<Tak.Direction> wallFlatteningDirections = new ArrayList<>();
+
     private static final Logger logger = LogManager.getLogger(MoveGenerator.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
         printBoard(state);
@@ -126,7 +128,9 @@ public final class MoveGenerator {
             if (!pileIsUnderControl(currentPile, min)) continue;
 
             Coordinates coordinates = translateIndexToCoordinates(state.getBoardLength(), i);
-            Map<Tak.Direction, Integer> directionsMap = getNOSWFreeFields(coordinates, state);
+            // if top piece is of type CAPSTONE- it will be able to flatten walls
+            Tak.PieceType topPiece = Tak.PieceType.FLAT_STONE; //currentPile.getPiecesList().get(currentPile.getPiecesCount() - 1).getType();
+            Map<Tak.Direction, Integer> directionsMap = getNOSWFreeFields(coordinates, state, topPiece);
             // the carryLimit can be at maximum the boardLength or less if pile has fewer pieces
             int carryLimit = Math.min(currentPile.getPiecesCount(), state.getBoardLength());
             // create Nodes for all directions
@@ -134,13 +138,17 @@ public final class MoveGenerator {
                 if(direction == Tak.Direction.UNRECOGNIZED) continue;
                 // for every direction, the free fields were calculated
                 int freeFieldCount = directionsMap.get(direction);
+                // if the top piece is a Capstone, and there is a wall which can be flattend, this counts as one more free field
+                // and we need to filter all drops of that length to only have 1 as last element: 2,2,1 or 2,3,1
+                // because Capstone needs to be last piece
+                boolean flatteningWall = topPiece == Tak.PieceType.CAPSTONE && wallFlatteningDirections.contains(direction);
                 // now we need to consider all possible drops in given direction for up to freeFieldCount fields
-                List<List<Integer>> allPossibleDrops = getAllPossibleDrops(freeFieldCount, carryLimit);
+                List<List<Integer>> allPossibleDrops = getAllPossibleDrops(freeFieldCount, carryLimit, flatteningWall);
                 // from the calculated drops we can create moveActions
                 List<Tak.MoveAction> moveActions = createMoveActionsFromDrops(allPossibleDrops, direction);
                 for(var moveAction: moveActions) {
                     Tak.GameTurn gameTurn = createMoveGameTurn(coordinates, moveAction);
-                      List<Tak.Pile> newBoard = updateBoardWithMoveAction(state, moveAction, i);
+                    List<Tak.Pile> newBoard = updateBoardWithMoveAction(state, moveAction, i);
 
                     // now we can create a new state, and from this new state the next moves can be played
                     Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
@@ -149,6 +157,7 @@ public final class MoveGenerator {
                     children.add(new Node(parent, min, gameTurn, newGameState));
                 }
             }
+            wallFlatteningDirections.clear();
         }
 
         return children;
@@ -217,13 +226,6 @@ public final class MoveGenerator {
         int y = startCoordinates.Y;
         for(var drop: drops) {
             movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldState.getBoardList(), movingPiecesIndex, x, y, drop);
-//            int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
-//            List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
-//            for(int i = 0; i < drop; i++) {
-//                updatedPile.add(movingPieces.get(movingPiecesIndex));
-//                movingPiecesIndex++;
-//            }
-//            newBoard.set(nextIndex, Tak.Pile.newBuilder().addAllPieces(updatedPile).build());
             x--;
         }
     }
@@ -259,7 +261,7 @@ public final class MoveGenerator {
         return moveActions;
     }
 
-    public static Map<Tak.Direction, Integer> getNOSWFreeFields(Coordinates coordinates, Tak.GameState state) {
+    public static Map<Tak.Direction, Integer> getNOSWFreeFields(Coordinates coordinates, Tak.GameState state, Tak.PieceType topPiece) {
         Map<Tak.Direction, Integer> directions = new HashMap<>();
 
         int maxMoveToNorth = 0;
@@ -270,28 +272,48 @@ public final class MoveGenerator {
         for ( int y = coordinates.Y - 1; y >= 0; y-- ) {
             int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(coordinates.X, y));
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
-            if ( checkForBlocker(pile) ) break;
+            if ( checkForCapstoneBlocker(pile) ) break;
+            if ( checkForWallBlocker(pile) ) {
+                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToNorth++;
+                wallFlatteningDirections.add(Tak.Direction.NORTH);
+                break;
+            }
             maxMoveToNorth++;
         }
 
         for ( int y = coordinates.Y + 1; y < state.getBoardLength(); y++ ) {
             int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(coordinates.X, y));
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
-            if ( checkForBlocker(pile) ) break;
+            if ( checkForCapstoneBlocker(pile) ) break;
+            if ( checkForWallBlocker(pile) ) {
+                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToSouth++;
+                wallFlatteningDirections.add(Tak.Direction.SOUTH);
+                break;
+            }
             maxMoveToSouth++;
         }
 
         for ( int x = coordinates.X + 1; x < state.getBoardLength(); x++ ) {
             int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(x, coordinates.Y));
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
-            if ( checkForBlocker(pile) ) break;
+            if ( checkForCapstoneBlocker(pile) ) break;
+            if ( checkForWallBlocker(pile) ) {
+                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToEast++;
+                wallFlatteningDirections.add(Tak.Direction.EAST);
+                break;
+            }
             maxMoveToEast++;
         }
 
         for ( int x = coordinates.X - 1; x >= 0; x-- ) {
             int currentIndex = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(x, coordinates.Y));
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
-            if ( checkForBlocker(pile) ) break;
+            if ( checkForCapstoneBlocker(pile) ) break;
+            if ( checkForWallBlocker(pile) ) {
+                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToWest++;
+                wallFlatteningDirections.add(Tak.Direction.WEST);
+                break;
+            }
             maxMoveToWest++;
         }
 
@@ -302,17 +324,22 @@ public final class MoveGenerator {
         return directions;
     }
 
-    private static boolean checkForBlocker(List<Tak.Piece> pile) {
+    private static boolean checkForCapstoneBlocker(List<Tak.Piece> pile) {
         if ( pile.size() != 0) {
-            return  pile.get(pile.size() - 1).getType() == Tak.PieceType.CAPSTONE ||
-                    pile.get(pile.size() - 1).getType() == Tak.PieceType.STANDING_STONE;
+            return  pile.get(pile.size() - 1).getType() == Tak.PieceType.CAPSTONE;
+        }
+        return false;
+    }
+
+    private static boolean checkForWallBlocker(List<Tak.Piece> pile) {
+        if ( pile.size() != 0) {
+            return  pile.get(pile.size() - 1).getType() == Tak.PieceType.STANDING_STONE;
         }
         return false;
     }
 
     private static int translateCoordinateToIndex(int boardLength, Coordinates coordinates) {
-        int index = coordinates.Y * boardLength + coordinates.X;
-        return index;
+        return coordinates.Y * boardLength + coordinates.X;
     }
 
 
@@ -387,7 +414,7 @@ public final class MoveGenerator {
         return coordinates;
     }
 
-    public static List<List<Integer>> getAllPossibleDrops(int fieldCount, int carryLimit) {
+    public static List<List<Integer>> getAllPossibleDrops(int fieldCount, int carryLimit, boolean flatteningWall) {
         List<List<Integer>> allPossibleDrops = new ArrayList<>();
         for(int pieceCount = 1; pieceCount <= carryLimit; pieceCount++) {
             List<List<Integer>> partitions = PartitionHelper.getAllPartitions(pieceCount);
@@ -397,7 +424,12 @@ public final class MoveGenerator {
             var drops = permutations.stream().filter(perm -> perm.size() <= fieldCount).collect(Collectors.toList());
             allPossibleDrops.addAll(drops);
         }
-        return allPossibleDrops;
+        List<List<Integer>> filteredDrops = new ArrayList<>();
+        for(var drop: allPossibleDrops) {
+            if(drop.size() == fieldCount && drop.get(drop.size() - 1) != 1) continue;
+            filteredDrops.add(drop);
+        }
+        return filteredDrops;
     }
 
     private static void printBoard(Tak.GameState state) {

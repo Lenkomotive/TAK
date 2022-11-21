@@ -1,9 +1,6 @@
-import algorithm.Evaluator;
 import algorithm.MoveGenerator;
 import algorithm.Tree;
 import json.JSONWriter;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import tak.Tak;
 import utils.PieceColor;
@@ -42,34 +39,5 @@ public class CreateTree {
             CreateBoardHelper.writeToJSON(node.currentState, beggingPlayer, folderName, counter);
             counter++;
         }
-    }
-
-    @Test
-    void getEvalCapturedTestWhite() {
-        int boardLength = 6;
-        List<Tak.Pile> board = CreateBoardHelper.createBoard(boardLength);
-        board.set(4, CreateBoardHelper.getFlatStonePile(4,false));
-        board.set(16, CreateBoardHelper.getFlatStonePile(8,false));
-        board.set(24, CreateBoardHelper.getCapStonePile(5,false));
-        board.set(13, CreateBoardHelper.getStandingStonePile(7,false));
-        Tak.GameState originState = CreateBoardHelper.createGameState(boardLength, board);
-
-        Evaluator evaluator = new Evaluator();
-
-        Assertions.assertEquals(4, evaluator.getEvalCaptured(originState, PieceColor.WHITE));
-    }
-    @Test
-    void getEvalCapturedTestBlack() {
-        int boardLength = 6;
-        List<Tak.Pile> board = CreateBoardHelper.createBoard(boardLength);
-        board.set(4, CreateBoardHelper.getFlatStonePile(1,true));
-        board.set(16, CreateBoardHelper.getFlatStonePile(1,true));
-        board.set(24, CreateBoardHelper.getCapStonePile(1,true));
-        board.set(13, CreateBoardHelper.getStandingStonePile(1,true));
-        Tak.GameState originState = CreateBoardHelper.createGameState(boardLength, board);
-
-        Evaluator evaluator = new Evaluator();
-
-        Assertions.assertEquals(4, evaluator.getEvalCaptured(originState, PieceColor.BLACK));
     }
 }
