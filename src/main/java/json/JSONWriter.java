@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JSONWriter {
+
+    public static String matchToken = "";
     private static final Logger logger = LogManager.getLogger(JSONWriter.class);
 
     private static final String PATH = "src/main/java/json/games/game_state.json";
@@ -25,6 +27,7 @@ public class JSONWriter {
         PieceColor ourColor = beginningPlayer? PieceColor.WHITE:PieceColor.BLACK;
         PieceColor opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
         JsonObjectBuilder json = Json.createObjectBuilder()
+                .add("match_token", matchToken)
                 .add("our_piece_color", ourColor.ordinal())
                 .add("opponent_piece_color", opponentColor.ordinal())
                 .add("board_length", state.getBoardLength())

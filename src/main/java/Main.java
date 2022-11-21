@@ -3,6 +3,7 @@ import client.Client;
 import json.JSONWriter;
 import netcode.Netcode;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
@@ -23,17 +24,19 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 8;
+    private static final int BOARD_LENGTH = 5;
     private static final int TIMEOUT = 20;
-    private static final int NUM_GAMES = 1;
+    private static final int NUM_GAMES = 500;
     public static int TREE_DEPTH = 3;
-    private static String OPPONENT = "lenk";
+    private static String OPPONENT = "";
 
     private static Client client;
     private static boolean beginningPlayer;
 
+    public static String matchToken = "";
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
+        logger.setLevel(Level.ERROR);
         MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
         for (int i = 0; i < NUM_GAMES; i++) {
@@ -55,17 +58,20 @@ public class Main {
                 sleep(SLEEP_MS);
                 continue;
             }
-            Tak.GameTurn turn = null;
-            Tak.GameState state = client.getGameState().getTakGameState();
-            writeToJSON(state);
-            if(firstMove) {
-                turn = MoveGenerator.playFirstMove(state);
-                firstMove = false;
-            } else {
-              turn =   MoveGenerator.playSmartMove(state);
-//                turn = MoveGenerator.playValidPlaceMove(state);
+            if(itIsOurTurn()) {
+                Tak.GameTurn turn = null;
+                Tak.GameState state = client.getGameState().getTakGameState();
+                writeToJSON(state);
+                if(firstMove) {
+                    turn = MoveGenerator.playFirstMove(state);
+                    firstMove = false;
+                } else {
+                    //turn =   MoveGenerator.playSmartMove(state);
+                    turn = MoveGenerator.playValidPlaceMove(state);
+                }
+                playTurn(turn);
             }
-            playTurn(turn);
+
         }
         Tak.GameState state = client.getGameState().getTakGameState();
         writeToJSON(state);
@@ -88,8 +94,9 @@ public class Main {
         MoveGenerator.opponentColor = beginningPlayer? PieceColor.BLACK: PieceColor.WHITE;
         logger.info("our color: " + MoveGenerator.ourColor);
 
-        String matchToken = response.getMatchToken();
-        logger.info("Match token: " + matchToken);
+        matchToken = response.getMatchToken();
+        JSONWriter.matchToken = matchToken;
+        logger.error("Match token: " + matchToken);
         client.initMatchIDPacket(matchToken);
 
         int boardLength = client.getGameState().getTakGameState().getBoardLength();
@@ -133,13 +140,18 @@ public class Main {
         return status == Netcode.GameStatus.OPPONENTS_TURN;
     }
 
+    private static boolean itIsOurTurn() {
+        Netcode.GameStatus status = client.getGameState().getGameStatus();
+        return status == Netcode.GameStatus.YOUR_TURN;
+    }
+
     private static void playTurn(Tak.GameTurn turn) {
         Netcode.TurnResponse response = client.submitTurn(turn);
         writeToJSON(response.getTakGameState());
         switch (response.getTurnStatus()) {
             case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
             case NOT_YOUR_TURN -> logger.error("It was not our Turn!");
-            case INVALID_TURN -> logger.error("Invalid Turn played!");
+            case INVALID_TURN -> logger.error("Invalid Turn played! x: " + turn.getX() + " y: " + turn.getY());
             case MATCH_OVER -> logger.info("Match is over!");
         }
     }

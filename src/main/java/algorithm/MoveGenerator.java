@@ -365,10 +365,22 @@ public final class MoveGenerator {
                 .build();
     }
 
+//    public static Tak.GameTurn playValidPlaceMove(Tak.GameState state) {
+//        int freeFieldIndex = findFirstFreeField(state.getBoardList());
+//        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
+//        return createPlaceGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
+//
+//    }
     public static Tak.GameTurn playValidPlaceMove(Tak.GameState state) {
-        int freeFieldIndex = findFirstFreeField(state.getBoardList());
-        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
-        return createPlaceGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
+        int numStones = state.getRemainingStonesList().get(ourColor.ordinal());
+        if(numStones != 0) {
+            int freeFieldIndex = findFirstFreeField(state.getBoardList());
+            Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
+            return createPlaceGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
+        }
+        Tak.GameTurn moveTurn = createAllMoveNodes(null, state, true).get(0).gameTurn;
+        logger.error("x: " + moveTurn.getX() + " y: " + moveTurn.getY() + " -- " + moveTurn.getMove().getDropsList());
+        return moveTurn;
     }
 
     private static int findFirstFreeField(List<Tak.Pile> board) {
