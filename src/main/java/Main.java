@@ -24,9 +24,9 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 5;
+    private static final int BOARD_LENGTH = 3;
     private static final int TIMEOUT = 20;
-    private static final int NUM_GAMES = 500;
+    private static final int NUM_GAMES = 100;
     public static int TREE_DEPTH = 3;
     private static String OPPONENT = "";
 
@@ -58,18 +58,15 @@ public class Main {
                 sleep(SLEEP_MS);
                 continue;
             }
-            if(itIsOurTurn()) {
-                Tak.GameTurn turn = null;
-                Tak.GameState state = client.getGameState().getTakGameState();
-                writeToJSON(state);
-                if(firstMove) {
-                    turn = MoveGenerator.playFirstMove(state);
-                    firstMove = false;
-                } else {
-                    //turn =   MoveGenerator.playSmartMove(state);
-                    turn = MoveGenerator.playValidPlaceMove(state);
-                }
-                playTurn(turn);
+            Tak.GameTurn turn = null;
+            Tak.GameState state = client.getGameState().getTakGameState();
+            writeToJSON(state);
+            if(firstMove) {
+                turn = MoveGenerator.playFirstMove(state);
+                firstMove = false;
+            } else {
+//              turn =   MoveGenerator.playSmartMove(state);
+                turn = MoveGenerator.playValidPlaceMove(state);
             }
 
         }
