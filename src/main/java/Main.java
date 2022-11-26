@@ -3,6 +3,7 @@ import client.Client;
 import json.JSONWriter;
 import netcode.Netcode;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import tak.Tak;
@@ -25,7 +26,7 @@ public class Main {
     // Game parameter
     private static final int BOARD_LENGTH = 3;
     private static final int TIMEOUT = 20;
-    private static final int NUM_GAMES = 100;
+    private static final int NUM_GAMES = 501;
     public static int TREE_DEPTH = 3;
     private static String OPPONENT = "";
 
@@ -34,12 +35,13 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
+        logger.setLevel(Level.ERROR);
         MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
         for (int i = 0; i < NUM_GAMES; i++) {
             turnCount = 0;
             currentFolderForGameStates = JSONWriter.createFolderForGameStates(PATH_TO_GAMES_FOLDER);
-            createMatch();
+            createMatch(i+1);
             waitForMatchToStart();
             checkOpponentInfo();
             checkAgreedTimeout();
@@ -73,7 +75,7 @@ public class Main {
         logger.info("-----------------------------------------------------------------");
     }
 
-    private static void createMatch() {
+    private static void createMatch(int numMatch) {
 
         Netcode.MatchResponse response;
         if(OPPONENT.equals("")) {
@@ -89,7 +91,7 @@ public class Main {
         logger.info("our color: " + MoveGenerator.ourColor);
 
         String matchToken = response.getMatchToken();
-        logger.info("Match token: " + matchToken);
+        logger.error("Match token: " + matchToken + " " + numMatch);
         client.initMatchIDPacket(matchToken);
 
         int boardLength = client.getGameState().getTakGameState().getBoardLength();
@@ -136,12 +138,14 @@ public class Main {
     private static void playTurn(Tak.GameTurn turn) {
         Netcode.TurnResponse response = client.submitTurn(turn);
         writeToJSON(response.getTakGameState());
+
         switch (response.getTurnStatus()) {
             case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
             case NOT_YOUR_TURN -> logger.error("It was not our Turn!");
-            case INVALID_TURN -> logger.error("Invalid Turn played!");
+            case INVALID_TURN -> logger.error("Invalid Turn played!" + turn.getX() + " y:" + turn.getY());
             case MATCH_OVER -> logger.info("Match is over!");
         }
+        assert (response.getTurnStatus() == Netcode.TurnStatus.INVALID_TURN);
     }
 
     private static void writeToJSON(Tak.GameState gameState) {
