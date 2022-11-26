@@ -129,7 +129,7 @@ public final class MoveGenerator {
 
             Coordinates coordinates = translateIndexToCoordinates(state.getBoardLength(), i);
             // if top piece is of type CAPSTONE- it will be able to flatten walls
-            Tak.PieceType topPiece = Tak.PieceType.FLAT_STONE; //currentPile.getPiecesList().get(currentPile.getPiecesCount() - 1).getType();
+            Tak.PieceType topPiece = currentPile.getPiecesList().get(currentPile.getPiecesCount() - 1).getType();
             Map<Tak.Direction, Integer> directionsMap = getNOSWFreeFields(coordinates, state, topPiece);
             // the carryLimit can be at maximum the boardLength or less if pile has fewer pieces
             int carryLimit = Math.min(currentPile.getPiecesCount(), state.getBoardLength());
@@ -147,8 +147,12 @@ public final class MoveGenerator {
                 // from the calculated drops we can create moveActions
                 List<Tak.MoveAction> moveActions = createMoveActionsFromDrops(allPossibleDrops, direction);
                 for(var moveAction: moveActions) {
+                    boolean flattingMove = false;
+                    if(flatteningWall && moveAction.getDropsList().size() == freeFieldCount) {
+                        flattingMove = true;
+                    }
                     Tak.GameTurn gameTurn = createMoveGameTurn(coordinates, moveAction);
-                    List<Tak.Pile> newBoard = updateBoardWithMoveAction(state, moveAction, i);
+                    List<Tak.Pile> newBoard = updateBoardWithMoveAction(state, moveAction, i, flattingMove);
 
                     // now we can create a new state, and from this new state the next moves can be played
                     Tak.GameState newGameState = createNewGameState(state.getBoardLength(),
@@ -163,7 +167,7 @@ public final class MoveGenerator {
         return children;
     }
 
-    private static List<Tak.Pile> updateBoardWithMoveAction(Tak.GameState oldState, Tak.MoveAction moveAction, int startIndex) {
+    private static List<Tak.Pile> updateBoardWithMoveAction(Tak.GameState oldState, Tak.MoveAction moveAction, int startIndex, boolean flattingMove) {
         List<Tak.Pile> newBoard = new ArrayList<>(oldState.getBoardList());
         // extract the piecesList which is worked on to split it
         var currentPiecesList =  newBoard.get(startIndex).getPiecesList();
@@ -179,7 +183,7 @@ public final class MoveGenerator {
         switch (moveAction.getDirection()) {
             case NORTH -> updateBoardInNorthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
             case EAST -> updateBoardInEastDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
-            case SOUTH -> updateBoardInSouthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+            case SOUTH -> updateBoardInSouthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
             case WEST -> updateBoardInWestDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
         }
         return newBoard;
@@ -208,8 +212,24 @@ public final class MoveGenerator {
         }
     }
 
-    private static void updateBoardInSouthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops) {
+    private static void updateBoardInSouthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
+
         Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+
+        if(flattingMove) {
+            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X, startCoordinates.Y+drops.size()));
+            List<Tak.Piece> flatteningPile = new ArrayList<>(newBoard.get(flatteningPileIndex).getPiecesList());
+            Tak.Piece wall = flatteningPile.get(flatteningPile.size() - 1);
+            Tak.Piece flat = Tak.Piece.newBuilder()
+                    .setType(Tak.PieceType.FLAT_STONE)
+                    .setSecondPlayerOwned(wall.getSecondPlayerOwned())
+                    .build();
+            flatteningPile.remove(flatteningPile.size() - 1);
+            //flatteningPile.add(flat);
+            Tak.Pile updatedPile = Tak.Pile.newBuilder().addAllPieces(flatteningPile).build();
+            newBoard.set(flatteningPileIndex, updatedPile);
+        }
+
         int movingPiecesIndex = 0;
         int x = startCoordinates.X;
         int y = startCoordinates.Y + 1;
@@ -274,8 +294,10 @@ public final class MoveGenerator {
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
             if ( checkForCapstoneBlocker(pile) ) break;
             if ( checkForWallBlocker(pile) ) {
-                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToNorth++;
-                wallFlatteningDirections.add(Tak.Direction.NORTH);
+                if(topPiece == Tak.PieceType.CAPSTONE)  {
+                    maxMoveToNorth++;
+                    wallFlatteningDirections.add(Tak.Direction.NORTH);
+                }
                 break;
             }
             maxMoveToNorth++;
@@ -286,8 +308,10 @@ public final class MoveGenerator {
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
             if ( checkForCapstoneBlocker(pile) ) break;
             if ( checkForWallBlocker(pile) ) {
-                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToSouth++;
-                wallFlatteningDirections.add(Tak.Direction.SOUTH);
+                if(topPiece == Tak.PieceType.CAPSTONE)  {
+                    maxMoveToSouth++;
+                    wallFlatteningDirections.add(Tak.Direction.SOUTH);
+                }
                 break;
             }
             maxMoveToSouth++;
@@ -298,8 +322,10 @@ public final class MoveGenerator {
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
             if ( checkForCapstoneBlocker(pile) ) break;
             if ( checkForWallBlocker(pile) ) {
-                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToEast++;
-                wallFlatteningDirections.add(Tak.Direction.EAST);
+                if(topPiece == Tak.PieceType.CAPSTONE)  {
+                    maxMoveToEast++;
+                    wallFlatteningDirections.add(Tak.Direction.EAST);
+                }
                 break;
             }
             maxMoveToEast++;
@@ -310,8 +336,10 @@ public final class MoveGenerator {
             List<Tak.Piece> pile = state.getBoardList().get(currentIndex).getPiecesList();
             if ( checkForCapstoneBlocker(pile) ) break;
             if ( checkForWallBlocker(pile) ) {
-                if(topPiece == Tak.PieceType.CAPSTONE) maxMoveToWest++;
-                wallFlatteningDirections.add(Tak.Direction.WEST);
+                if(topPiece == Tak.PieceType.CAPSTONE)  {
+                    maxMoveToWest++;
+                    wallFlatteningDirections.add(Tak.Direction.WEST);
+                }
                 break;
             }
             maxMoveToWest++;
@@ -436,12 +464,16 @@ public final class MoveGenerator {
             var drops = permutations.stream().filter(perm -> perm.size() <= fieldCount).collect(Collectors.toList());
             allPossibleDrops.addAll(drops);
         }
-        List<List<Integer>> filteredDrops = new ArrayList<>();
-        for(var drop: allPossibleDrops) {
-            if(drop.size() == fieldCount && drop.get(drop.size() - 1) != 1) continue;
-            filteredDrops.add(drop);
+
+        if(flatteningWall) {
+            List<List<Integer>> filteredDrops = new ArrayList<>();
+            for(var drop: allPossibleDrops) {
+                if(drop.size() == fieldCount && drop.get(drop.size() - 1) != 1) continue;
+                filteredDrops.add(drop);
+            }
+            return  filteredDrops;
         }
-        return filteredDrops;
+        return allPossibleDrops;
     }
 
     private static void printBoard(Tak.GameState state) {
