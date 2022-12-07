@@ -181,17 +181,23 @@ public final class MoveGenerator {
         // the movingPieces have to be split in the given direction according to the drops
         var movingPieces = currentPiecesList.subList(currentPiecesList.size() - numberOfMovingPieces, currentPiecesList.size());
         switch (moveAction.getDirection()) {
-            case NORTH -> updateBoardInNorthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
-            case EAST -> updateBoardInEastDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+            case NORTH -> updateBoardInNorthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
+            case EAST -> updateBoardInEastDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
             case SOUTH -> updateBoardInSouthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
-            case WEST -> updateBoardInWestDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList());
+            case WEST -> updateBoardInWestDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
         }
         return newBoard;
     }
 
     private static void updateBoardInNorthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces,
-                                                    List<Tak.Pile> newBoard, List<Integer> drops) {
+                                                    List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
         Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+
+        if(flattingMove) {
+            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X, startCoordinates.Y - drops.size()));
+            flattenWall(newBoard, flatteningPileIndex);
+        }
+
         int movingPiecesIndex = 0;
         int x = startCoordinates.X;
         int y = startCoordinates.Y - 1;
@@ -201,8 +207,14 @@ public final class MoveGenerator {
         }
     }
 
-    private static void updateBoardInEastDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops) {
+    private static void updateBoardInEastDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
         Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+
+        if(flattingMove) {
+            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X + drops.size(), startCoordinates.Y));
+            flattenWall(newBoard, flatteningPileIndex);
+        }
+
         int movingPiecesIndex = 0;
         int x = startCoordinates.X + 1;
         int y = startCoordinates.Y;
@@ -213,21 +225,11 @@ public final class MoveGenerator {
     }
 
     private static void updateBoardInSouthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
-
         Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
 
         if(flattingMove) {
             int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X, startCoordinates.Y+drops.size()));
-            List<Tak.Piece> flatteningPile = new ArrayList<>(newBoard.get(flatteningPileIndex).getPiecesList());
-            Tak.Piece wall = flatteningPile.get(flatteningPile.size() - 1);
-            Tak.Piece flat = Tak.Piece.newBuilder()
-                    .setType(Tak.PieceType.FLAT_STONE)
-                    .setSecondPlayerOwned(wall.getSecondPlayerOwned())
-                    .build();
-            flatteningPile.remove(flatteningPile.size() - 1);
-            //flatteningPile.add(flat);
-            Tak.Pile updatedPile = Tak.Pile.newBuilder().addAllPieces(flatteningPile).build();
-            newBoard.set(flatteningPileIndex, updatedPile);
+            flattenWall(newBoard, flatteningPileIndex);
         }
 
         int movingPiecesIndex = 0;
@@ -239,8 +241,14 @@ public final class MoveGenerator {
         }
     }
 
-    private static void updateBoardInWestDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops) {
+    private static void updateBoardInWestDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
         Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
+
+        if(flattingMove) {
+            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X - drops.size() , startCoordinates.Y));
+            flattenWall(newBoard, flatteningPileIndex);
+        }
+
         int movingPiecesIndex = 0;
         int x = startCoordinates.X - 1;
         int y = startCoordinates.Y;
@@ -250,9 +258,22 @@ public final class MoveGenerator {
         }
     }
 
+    private static void flattenWall(List<Tak.Pile> newBoard, int flatteningPileIndex) {
+        List<Tak.Piece> flatteningPile = new ArrayList<>(newBoard.get(flatteningPileIndex).getPiecesList());
+        Tak.Piece wall = flatteningPile.get(flatteningPile.size() - 1);
+        Tak.Piece flat = Tak.Piece.newBuilder()
+                .setType(Tak.PieceType.FLAT_STONE)
+                .setSecondPlayerOwned(wall.getSecondPlayerOwned())
+                .build();
+        flatteningPile.remove(flatteningPile.size() - 1);
+        flatteningPile.add(flat);
+        Tak.Pile updatedPile = Tak.Pile.newBuilder().addAllPieces(flatteningPile).build();
+        newBoard.set(flatteningPileIndex, updatedPile);
+    }
+
     private static int addDropsToBoard(Tak.GameState oldState, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Tak.Pile> oldBoard, int movingPiecesIndex, int x, int y, Integer drop) {
         int nextIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(x, y));
-        List<Tak.Piece> updatedPile = new ArrayList<>(oldBoard.get(nextIndex).getPiecesList());
+        List<Tak.Piece> updatedPile = new ArrayList<>(newBoard.get(nextIndex).getPiecesList());
         for(int i = 0; i < drop; i++) {
             updatedPile.add(movingPieces.get(movingPiecesIndex));
             movingPiecesIndex++;
