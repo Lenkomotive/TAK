@@ -22,13 +22,12 @@ public final class MoveGenerator {
 
     private static final Logger logger = LogManager.getLogger(MoveGenerator.class);
     public static Tak.GameTurn playSmartMove(Tak.GameState state) {
-        printBoard(state);
         Tree tree = new Tree(state);
-        logger.info("Created: 1 node | Depth: 0 | Level: MAX");
+//        logger.info("Created: 1 node | Depth: 0 | Level: MAX");
         //min
         tree.root.children.addAll(createAllPlaceNodes(tree.root, state, true));
         tree.root.children.addAll(createAllMoveNodes(tree.root, state, true));
-        logger.info("Created: " + tree.root.children.size() + " nodes | Depth: 1 | Level: MIN");
+//        logger.info("Created: " + tree.root.children.size() + " nodes | Depth: 1 | Level: MIN");
         boolean min = false;
 
 
@@ -44,10 +43,11 @@ public final class MoveGenerator {
                 System.out.print("\r Created " + counter +  " nodes! " + BAKI);
             }
             System.out.println();
-            logger.info("Created: " + counter + " nodes | Depth: "+ depth + " | Level: "+ (min? "MIN":"MAX"));
+//            logger.info("Created: " + counter + " nodes | Depth: "+ depth + " | Level: "+ (min? "MIN":"MAX"));
             children = newChildren;
             min = !min;
         }
+
         Evaluator evaluator = new Evaluator();
 
         float MAX = 0.0f;
@@ -180,81 +180,56 @@ public final class MoveGenerator {
         newBoard.set(startIndex, leftOverPile);
         // the movingPieces have to be split in the given direction according to the drops
         var movingPieces = currentPiecesList.subList(currentPiecesList.size() - numberOfMovingPieces, currentPiecesList.size());
-        switch (moveAction.getDirection()) {
-            case NORTH -> updateBoardInNorthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
-            case EAST -> updateBoardInEastDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
-            case SOUTH -> updateBoardInSouthDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
-            case WEST -> updateBoardInWestDirection(oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
-        }
+        updateBoard(moveAction.getDirection(), oldState, startIndex ,movingPieces, newBoard, moveAction.getDropsList(), flattingMove);
         return newBoard;
     }
 
-    private static void updateBoardInNorthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces,
+    private static void updateBoard(Tak.Direction direction, Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces,
                                                     List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
         Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
 
+        int flattenX = 0, flattenY = 0, dropX = 0, dropY = 0;
+        switch (direction) {
+            case NORTH:
+                flattenX = startCoordinates.X;
+                flattenY = startCoordinates.Y - drops.size();
+                dropX = startCoordinates.X;
+                dropY = startCoordinates.Y - 1;
+                break;
+            case EAST:
+                flattenX = startCoordinates.X + drops.size();
+                flattenY = startCoordinates.Y;
+                dropX = startCoordinates.X + 1;
+                dropY = startCoordinates.Y;
+                break;
+            case SOUTH:
+                flattenX = startCoordinates.X;
+                flattenY = startCoordinates.Y + drops.size();
+                dropX = startCoordinates.X;
+                dropY = startCoordinates.Y + 1;
+                break;
+            case WEST:
+                flattenX = startCoordinates.X - drops.size();
+                flattenY = startCoordinates.Y;
+                dropX = startCoordinates.X - 1;
+                dropY = startCoordinates.Y;
+                break;
+        }
+
         if(flattingMove) {
-            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X, startCoordinates.Y - drops.size()));
+            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(flattenX, flattenY));
             flattenWall(newBoard, flatteningPileIndex);
         }
 
         int movingPiecesIndex = 0;
-        int x = startCoordinates.X;
-        int y = startCoordinates.Y - 1;
         for(var drop: drops) {
-            movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldState.getBoardList(), movingPiecesIndex, x, y, drop);
-            y--;
-        }
-    }
-
-    private static void updateBoardInEastDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
-        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
-
-        if(flattingMove) {
-            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X + drops.size(), startCoordinates.Y));
-            flattenWall(newBoard, flatteningPileIndex);
-        }
-
-        int movingPiecesIndex = 0;
-        int x = startCoordinates.X + 1;
-        int y = startCoordinates.Y;
-        for(var drop: drops) {
-            movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldState.getBoardList(), movingPiecesIndex, x, y, drop);
-            x++;
-        }
-    }
-
-    private static void updateBoardInSouthDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
-        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
-
-        if(flattingMove) {
-            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X, startCoordinates.Y+drops.size()));
-            flattenWall(newBoard, flatteningPileIndex);
-        }
-
-        int movingPiecesIndex = 0;
-        int x = startCoordinates.X;
-        int y = startCoordinates.Y + 1;
-        for(var drop: drops) {
-            movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldState.getBoardList(), movingPiecesIndex, x, y, drop);
-            y++;
-        }
-    }
-
-    private static void updateBoardInWestDirection(Tak.GameState oldState, int startIndex, List<Tak.Piece> movingPieces, List<Tak.Pile> newBoard, List<Integer> drops, boolean flattingMove) {
-        Coordinates startCoordinates = translateIndexToCoordinates(oldState.getBoardLength(), startIndex);
-
-        if(flattingMove) {
-            int flatteningPileIndex = translateCoordinateToIndex(oldState.getBoardLength(), new Coordinates(startCoordinates.X - drops.size() , startCoordinates.Y));
-            flattenWall(newBoard, flatteningPileIndex);
-        }
-
-        int movingPiecesIndex = 0;
-        int x = startCoordinates.X - 1;
-        int y = startCoordinates.Y;
-        for(var drop: drops) {
-            movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldState.getBoardList(), movingPiecesIndex, x, y, drop);
-            x--;
+            movingPiecesIndex = addDropsToBoard(oldState, movingPieces, newBoard, oldState.getBoardList(), movingPiecesIndex, dropX, dropY, drop);
+            switch (direction) {
+                case NORTH -> dropY--;
+                case EAST -> dropX++;
+                case SOUTH -> dropY++;
+                case WEST -> dropX--;
+            }
         }
     }
 
@@ -448,7 +423,6 @@ public final class MoveGenerator {
             Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
             return createPlaceGameTurn(state.getBoardLength(), freeFieldIndex, placeAction);
         }
-        logger.error("MOVEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
         return createAllMoveNodes(null, state, true).get(0).gameTurn;
     }
 

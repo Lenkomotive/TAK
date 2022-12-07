@@ -122,6 +122,33 @@ public class MovingTest {
         }
     }
 
+    @Test
+    void flatteningWall4() throws IOException {
+        String folderName = JSONWriter.createFolderForDebugGameStates(PATH_TO_GAMES_FOLDER);
+        int boardLength = 8;
+        MoveGenerator.ourColor = PieceColor.WHITE;
+        List<Tak.Pile> board = CreateBoardHelper.createBoard(boardLength);
+        board.set(40, CreateBoardHelper.getStandingStonePile(8,false));
+        board.set(47, CreateBoardHelper.getCapStonePile(8,false));
+        board.set(61, CreateBoardHelper.getStandingStonePile(8,false));
+        Tak.GameState originState = CreateBoardHelper.createGameState(boardLength, board);
+        Tree tree = new Tree(originState);
+        CreateBoardHelper.writeToJSON(originState, true, folderName, 0);
+        boolean min = true;
+        boolean beggingPlayer = true;
+
+        //min
+        tree.root.children.addAll(MoveGenerator.createAllMoveNodes(tree.root, originState, min));
+
+        int counter = 0;
+        for(var node :tree.root.children) {
+            CreateBoardHelper.writeToJSON(originState, beggingPlayer, folderName, counter);
+            counter++;
+            CreateBoardHelper.writeToJSON(node.currentState, beggingPlayer, folderName, counter);
+            counter++;
+        }
+    }
+
 
 
 }
