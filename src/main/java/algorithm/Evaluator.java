@@ -1,7 +1,5 @@
 package algorithm;
 
-import com.google.common.collect.Lists;
-import org.apache.http.io.SessionOutputBuffer;
 import tak.Tak;
 import utils.PieceColor;
 
