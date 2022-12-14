@@ -68,7 +68,7 @@ public class Main {
 //              turn =   MoveGenerator.playSmartMove(state);
                 turn = MoveGenerator.playValidPlaceMove(state);
             }
-
+            playTurn(turn);
         }
         Tak.GameState state = client.getGameState().getTakGameState();
         writeToJSON(state);
