@@ -18,7 +18,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(1, 1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,1,1,1);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -34,7 +34,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0, 0);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,2,2,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -50,7 +50,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0, 1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,2,1,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -66,7 +66,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(2, 1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,0,1,2);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -82,7 +82,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0, 0);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,3,3,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -98,7 +98,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(1, 1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,2,2,1);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -114,7 +114,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(2, 3);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(3,1,0,2);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -130,7 +130,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(3, 1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,0,2,3);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -146,7 +146,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0,0);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,4,4,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -162,7 +162,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(2,2);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(2,2,2,2);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -178,7 +178,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(4,3);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(3,0,1,4);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -194,7 +194,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(1,1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,3,3,1);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -210,7 +210,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0,5);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(5,5,0,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -226,7 +226,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(3,3);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(3,2,2,3);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -242,7 +242,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(3,1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,2,4,3);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -258,7 +258,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(4,5);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(5,1,0,4);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -274,7 +274,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(5,5);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(5,2,2,5);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -290,7 +290,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(7,7);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(7,0,0,7);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -306,7 +306,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(2,3);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(3,5,4,2);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -322,7 +322,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(3,7);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(7,4,0,3);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -339,7 +339,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0,0);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,1,2,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -356,7 +356,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(1,1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,0,1,1);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -374,7 +374,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(0,2);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,0,0,0);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -393,7 +393,7 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(1,1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,0,0,1);
 
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
@@ -413,13 +413,31 @@ public class FreeMovingFieldTests {
         Coordinates coordinates = new Coordinates(2,1);
         Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(0,0,0,2);
         //alooooo
-        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.FLAT_STONE);
 
         Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
         Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
         Assertions.assertEquals(expected.get(Tak.Direction.SOUTH), result.get(Tak.Direction.SOUTH));
         Assertions.assertEquals(expected.get(Tak.Direction.WEST), result.get(Tak.Direction.WEST));
     }
+
+    @Test
+    public void calculateDirectionWithFlatteningWall3x3() {
+        int boardLength = 3;
+        List<Tak.Pile> board = createBoard(boardLength);
+        board.set(7, CreateBoardHelper.getStandingStonePile(3, true));
+        board.set(1, CreateBoardHelper.getStandingStonePile(1, true));
+        Tak.GameState gameState = createGameState(boardLength, board);
+        Coordinates coordinates = new Coordinates(1,2);
+        Map<Tak.Direction, Integer> expected = createExpectedDirectionMap(1,1,0,1);
+        Map<Tak.Direction, Integer> result = MoveGenerator.getNOSWFreeFields(coordinates, gameState, Tak.PieceType.STANDING_STONE);
+
+        Assertions.assertEquals(expected.get(Tak.Direction.NORTH), result.get(Tak.Direction.NORTH));
+        Assertions.assertEquals(expected.get(Tak.Direction.EAST), result.get(Tak.Direction.EAST));
+        Assertions.assertEquals(expected.get(Tak.Direction.SOUTH), result.get(Tak.Direction.SOUTH));
+        Assertions.assertEquals(expected.get(Tak.Direction.WEST), result.get(Tak.Direction.WEST));
+    }
+
 
 
 

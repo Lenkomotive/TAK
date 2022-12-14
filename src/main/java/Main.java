@@ -24,9 +24,9 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 5;
+    private static final int BOARD_LENGTH = 3;
     private static final int TIMEOUT = 20;
-    private static final int NUM_GAMES = 500;
+    private static final int NUM_GAMES = 501;
     public static int TREE_DEPTH = 3;
     private static String OPPONENT = "";
 
@@ -42,7 +42,7 @@ public class Main {
         for (int i = 0; i < NUM_GAMES; i++) {
             turnCount = 0;
             currentFolderForGameStates = JSONWriter.createFolderForGameStates(PATH_TO_GAMES_FOLDER);
-            createMatch();
+            createMatch(i+1);
             waitForMatchToStart();
             checkOpponentInfo();
             checkAgreedTimeout();
@@ -58,18 +58,15 @@ public class Main {
                 sleep(SLEEP_MS);
                 continue;
             }
-            if(itIsOurTurn()) {
-                Tak.GameTurn turn = null;
-                Tak.GameState state = client.getGameState().getTakGameState();
-                writeToJSON(state);
-                if(firstMove) {
-                    turn = MoveGenerator.playFirstMove(state);
-                    firstMove = false;
-                } else {
-                    //turn =   MoveGenerator.playSmartMove(state);
-                    turn = MoveGenerator.playValidPlaceMove(state);
-                }
-                playTurn(turn);
+            Tak.GameTurn turn = null;
+            Tak.GameState state = client.getGameState().getTakGameState();
+            writeToJSON(state);
+            if(firstMove) {
+                turn = MoveGenerator.playFirstMove(state);
+                firstMove = false;
+            } else {
+//              turn =   MoveGenerator.playSmartMove(state);
+                turn = MoveGenerator.playValidPlaceMove(state);
             }
 
         }
@@ -79,7 +76,7 @@ public class Main {
         logger.info("-----------------------------------------------------------------");
     }
 
-    private static void createMatch() {
+    private static void createMatch(int numMatch) {
 
         Netcode.MatchResponse response;
         if(OPPONENT.equals("")) {
@@ -148,12 +145,14 @@ public class Main {
     private static void playTurn(Tak.GameTurn turn) {
         Netcode.TurnResponse response = client.submitTurn(turn);
         writeToJSON(response.getTakGameState());
+
         switch (response.getTurnStatus()) {
             case OK -> logger.info("Turn status for x:" + turn.getX() + " y:" + turn.getY() + " is: " + response.getTurnStatus());
             case NOT_YOUR_TURN -> logger.error("It was not our Turn!");
             case INVALID_TURN -> logger.error("Invalid Turn played! x: " + turn.getX() + " y: " + turn.getY());
             case MATCH_OVER -> logger.info("Match is over!");
         }
+        assert (response.getTurnStatus() == Netcode.TurnStatus.INVALID_TURN);
     }
 
     private static void writeToJSON(Tak.GameState gameState) {
