@@ -36,7 +36,9 @@ public class Main {
     public static String matchToken = "";
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
-        logger.setLevel(Level.ERROR);
+
+        //logger.setLevel(Level.ERROR);
+
         MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
         for (int i = 0; i < NUM_GAMES; i++) {

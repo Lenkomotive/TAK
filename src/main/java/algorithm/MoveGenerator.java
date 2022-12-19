@@ -30,7 +30,7 @@ public final class MoveGenerator {
 //        logger.info("Created: " + tree.root.children.size() + " nodes | Depth: 1 | Level: MIN");
         boolean min = false;
 
-
+        // check win only for first layer
         List<Node> children = tree.root.children;
         for (int depth = 2; depth <= TREE_DEPTH ; depth++) {
             List<Node> newChildren = new ArrayList<>();
