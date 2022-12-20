@@ -30,6 +30,10 @@ public class Evaluator {
     public  boolean blackWinningMoveDetected = false;
     public  boolean whiteWinningMoveDetected = false;
 
+    public float longestSnake = 0.0f;
+
+    public static int checkWinBoardLength = 1;
+
     public float getEvalCaptured(Tak.GameState state, PieceColor ourColor) {
         List<Tak.Pile> boardList = state.getBoardList();
         Map<String, Float> pieceCount = new HashMap<>(Map.of("White", 0.0f, "Black", 0.0f));
@@ -71,12 +75,14 @@ public class Evaluator {
                 List<Tak.Piece> pile = partition.get(row).get(column).getPiecesList();
                 if (pile.size() == 0) continue;
                 if (pile.get(pile.size() - 1).getSecondPlayerOwned()) {
+                    longestSnake = 0.0f;
                     startingRow = row;
                     startingColumn = column;
                     float snake = depthFirstSearch(partition, row, column, PieceColor.BLACK, boardLength);
-                     snakes.get("Black").add(snake);
+                    snakes.get("Black").add(snake);
                 }
                 if(!pile.get(pile.size() - 1).getSecondPlayerOwned()) {
+                    longestSnake = 0.0f;
                     startingRow = row;
                     startingColumn = column;
                     float snake = depthFirstSearch(partition, row, column, PieceColor.WHITE, boardLength);
@@ -92,6 +98,16 @@ public class Evaluator {
         if(blackWinningMoveDetected && ourColor == PieceColor.BLACK) {
             return winningMoveEvaluation;
         }
+        if(whiteWinningMoveDetected && ourColor == PieceColor.WHITE) {
+            return winningMoveEvaluation;
+        }
+        if(blackWinningMoveDetected) {
+            return -winningMoveEvaluation;
+        }
+        if(whiteWinningMoveDetected) {
+            return -winningMoveEvaluation;
+        }
+
         float whiteSnakeScore = 0.0f;
         float blackSnakeScore = 0.0f;
 
@@ -146,9 +162,10 @@ public class Evaluator {
         }
 
         List<Tak.Piece> pile = partition.get(row).get(column).getPiecesList();
-        PieceColor topStone = pile.get(pile.size() - 1).getSecondPlayerOwned() ? PieceColor.BLACK : PieceColor.WHITE;
+        Tak.Piece topStone = pile.get(pile.size() - 1);
+        PieceColor topStoneColor = pile.get(pile.size() - 1).getSecondPlayerOwned() ? PieceColor.BLACK : PieceColor.WHITE;
 
-        if(topStone != pieceColor) {
+        if(topStoneColor != pieceColor || topStone.getType() == Tak.PieceType.STANDING_STONE) {
             return 0.0f;
         }
 
@@ -157,7 +174,10 @@ public class Evaluator {
         float connected = 1;
 
 
-        checkWin(row, column, boardLength, pieceColor);
+        checkWin(row, column, boardLength, pieceColor, partition);
+
+        checkSnakeLength(row, column, boardLength);
+
         connected += depthFirstSearch(partition, row + 1, column, pieceColor, boardLength);
         connected += depthFirstSearch(partition, row - 1, column, pieceColor, boardLength);
         connected += depthFirstSearch(partition, row , column + 1, pieceColor, boardLength);
@@ -165,12 +185,26 @@ public class Evaluator {
         return connected;
     }
 
-    private void checkWin(int endingRow, int endingColumn, int boardLength, PieceColor pieceColor) {
-        if(Math.abs(endingRow - startingRow) == boardLength - 1 || Math.abs(endingColumn - startingColumn) == boardLength - 1) {
-            switch (pieceColor){
+    private void checkWin(int endingRow, int endingColumn, int boardLength, PieceColor pieceColor, List<List<Tak.Pile>> partition) {
+        if(Math.abs(endingRow - startingRow) == boardLength - checkWinBoardLength ||
+                    Math.abs(endingColumn - startingColumn) == boardLength - checkWinBoardLength) {
+            switch (pieceColor) {
                 case BLACK -> blackWinningMoveDetected = true;
                 case WHITE -> whiteWinningMoveDetected = true;
             }
         }
+    }
+
+    private void checkSnakeLength(int endingRow, int endingColumn, int boardLength) {
+        int rowSnake = Math.abs(endingRow - startingRow);
+        int columnSnake = Math.abs(endingColumn - startingColumn);
+
+        if(rowSnake > longestSnake) {
+            longestSnake = rowSnake;
+        }
+        if(columnSnake > longestSnake) {
+            longestSnake = columnSnake;
+        }
+
     }
 }
