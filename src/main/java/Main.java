@@ -24,9 +24,9 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 3;
+    private static final int BOARD_LENGTH = 5;
     private static final int TIMEOUT = 20;
-    private static final int NUM_GAMES = 501;
+    private static final int NUM_GAMES = 1;
     public static int TREE_DEPTH = 3;
     private static String OPPONENT = "";
 
@@ -36,7 +36,9 @@ public class Main {
     public static String matchToken = "";
     public static void main(String[] args) throws InterruptedException, IOException {
         BasicConfigurator.configure(); //log4j
-        logger.setLevel(Level.ERROR);
+
+        //logger.setLevel(Level.ERROR);
+
         MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
         for (int i = 0; i < NUM_GAMES; i++) {
@@ -65,8 +67,8 @@ public class Main {
                 turn = MoveGenerator.playFirstMove(state);
                 firstMove = false;
             } else {
-//              turn =   MoveGenerator.playSmartMove(state);
-                turn = MoveGenerator.playValidPlaceMove(state);
+                turn =   MoveGenerator.playSmartMove(state);
+                //turn = MoveGenerator.playValidPlaceMove(state);
             }
             playTurn(turn);
         }

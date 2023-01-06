@@ -25,13 +25,40 @@ public final class MoveGenerator {
         Tree tree = new Tree(state);
 //        logger.info("Created: 1 node | Depth: 0 | Level: MAX");
         //min
+
         tree.root.children.addAll(createAllPlaceNodes(tree.root, state, true));
         tree.root.children.addAll(createAllMoveNodes(tree.root, state, true));
 //        logger.info("Created: " + tree.root.children.size() + " nodes | Depth: 1 | Level: MIN");
         boolean min = false;
 
-
         List<Node> children = tree.root.children;
+
+        Node winningMove = checkWinningMove(children, ourColor);
+
+        // if there is a winning move possible as the next move, play that node.
+        if(winningMove != null){
+            logger.info("WINNING MOVE DETECTED");
+            return winningMove.gameTurn;
+        }
+
+        PieceColor ourColorTMP = ourColor;
+        PieceColor opponentColorTMP = opponentColor;
+        opponentColor = ourColor;
+        ourColor = opponentColorTMP;
+        List<Node> opponentAllPlaceMoves = createAllPlaceNodes(tree.root, state, true);
+        ourColor = ourColorTMP;
+        opponentColor = opponentColorTMP;
+
+        Node opponentWinningMove = checkWinningMove(opponentAllPlaceMoves, opponentColor);
+
+        // opponent has winning move, play that node as our color instead of opponents
+        if(opponentWinningMove != null && opponentWinningMove.gameTurn.getActionCase() == Tak.GameTurn.ActionCase.PLACE) {
+            logger.info("OPPONENT WINNING MOVE DETECTED");
+            Tak.PlaceAction wallPlaceAction = createPlaceAction(Tak.PieceType.STANDING_STONE);
+            int i = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(opponentWinningMove.gameTurn.getX(),opponentWinningMove.gameTurn.getY()));
+            return createPlaceGameTurn(state.getBoardLength(), i, wallPlaceAction);
+        }
+
         for (int depth = 2; depth <= TREE_DEPTH ; depth++) {
             List<Node> newChildren = new ArrayList<>();
             int counter = 0;
@@ -54,7 +81,17 @@ public final class MoveGenerator {
         float MIN = 0.0f;
         for(var child : children) {
             child.val = 0.0f;
-            child.val = evaluator.getEvalCaptured(child.currentState, ourColor) + evaluator.getEvalComposition(child.currentState, ourColor);
+            float composition = evaluator.getEvalComposition(child.currentState, ourColor);
+            float captured    = evaluator.getEvalCaptured(child.currentState, ourColor);
+            if(composition == Evaluator.winningMoveEvaluation){
+                Node finalMove = child;
+                for (int i = 0; i < TREE_DEPTH - 1; i++) {
+                    finalMove = finalMove.parent;
+                }
+                return finalMove.gameTurn;
+            }
+
+            child.val = captured + composition;
             if(child.val > MAX) MAX = child.val;
             if(child.val < MIN) MIN = child.val;
         }
@@ -70,7 +107,6 @@ public final class MoveGenerator {
         logger.info("MIN: "  + MIN);
         return finalMove.gameTurn;
     }
-
 
     public static List<Node> createAllPlaceNodes(Node parent, Tak.GameState state, boolean min) {
         // place actions are only valid on empty fields
@@ -138,7 +174,7 @@ public final class MoveGenerator {
                 if(direction == Tak.Direction.UNRECOGNIZED) continue;
                 // for every direction, the free fields were calculated
                 int freeFieldCount = directionsMap.get(direction);
-                // if the top piece is a Capstone, and there is a wall which can be flattend, this counts as one more free field
+                // if the top piece is a Capstone, and there is a wall which can be flattened, this counts as one more free field
                 // and we need to filter all drops of that length to only have 1 as last element: 2,2,1 or 2,3,1
                 // because Capstone needs to be last piece
                 boolean flatteningWall = topPiece == Tak.PieceType.CAPSTONE && wallFlatteningDirections.contains(direction);
@@ -165,6 +201,20 @@ public final class MoveGenerator {
         }
 
         return children;
+    }
+
+    public static Node checkWinningMove(List<Node> children, PieceColor color) {
+        Evaluator evaluator = new Evaluator();
+        for(var child : children) {
+            float eval = evaluator.getEvalComposition(child.currentState, color);
+            Evaluator.checkWinBoardLength = 1;
+            if(color == PieceColor.BLACK && evaluator.blackWinningMoveDetected) {
+                return child;
+            } else if (color == PieceColor.WHITE && evaluator.whiteWinningMoveDetected) {
+                return child;
+            }
+        }
+        return null;
     }
 
     private static List<Tak.Pile> updateBoardWithMoveAction(Tak.GameState oldState, Tak.MoveAction moveAction, int startIndex, boolean flattingMove) {
