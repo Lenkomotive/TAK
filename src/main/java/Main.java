@@ -24,10 +24,10 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 5;
+    private static final int BOARD_LENGTH = 3;
     private static final int TIMEOUT = 20;
     private static final int NUM_GAMES = 1;
-    public static int TREE_DEPTH = 3;
+    public static int TREE_DEPTH = 5;
     private static String OPPONENT = "";
 
     private static Client client;
