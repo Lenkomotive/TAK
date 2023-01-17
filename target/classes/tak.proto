@@ -1,0 +1,113 @@
+// Author: Martin Wistauder
+// Version: 1.0
+// Date: 10.10.2022
+syntax = "proto3";
+package tak;
+
+// -----------------------------------------
+// Tak network protocol implementation
+// -----------------------------------------
+
+// General Information:
+// - GameToken: tak
+
+// The GameParameter packet defines the game-specific start settings.
+message GameParameter {
+  uint32 board_length = 1; // Board length of the quadratic game board.
+}
+
+// Direction translated to x/y axis direction.
+enum Direction {
+  NORTH = 0; // -y direction
+  EAST = 1; // +x direction
+  SOUTH = 2; // +y direction
+  WEST = 3; // -x direction
+}
+
+// Type of the stone to play.
+enum PieceType {
+  FLAT_STONE = 0;
+  STANDING_STONE = 1;
+  CAPSTONE = 2;
+}
+
+// The player places a stone/piece.
+message PlaceAction {
+  PieceType piece = 1; // Stone/piece to play.
+}
+
+// The player moves a pile.
+message MoveAction {
+  Direction direction = 1; // Direction to drop the stones.
+  // List of stones to drop.
+  // Stones are removed from the origin pile at (x|y) and dropped in the given direction.
+  // Lower indices are closer to the origin pile.
+  //
+  // Example:
+  //   Lets assume we have a 6x1 snippet of the board (n=6), with 6 flat stones of player 1 on position (1|0).
+  //   We want to drop 1 flat stone at position (2|0), 2 flat stones at (3|0) and 3 flat stones at (4|0).
+  //
+  //   Initial board (top left is (0|0)):
+  //    --- --- --- --- --- ---
+  //   |   | 6 |   |   |   |   |
+  //    --- --- --- --- --- ---
+  //
+  //   To achieve this move, a MoveAction has to look like this:
+  //   - direction := EAST
+  //   - drops := [1, 2, 3]
+  //
+  //   The resulting board will look like this:
+  //    --- --- --- --- --- ---
+  //   |   |   | 1 | 2 | 3 |   |
+  //    --- --- --- --- --- ---
+  //
+  repeated uint32 drops = 2;
+}
+
+// The GameTurn packet defines the players action for this turn.
+message GameTurn {
+  uint32 x = 1; // Position, X-axis coordinate.
+  uint32 y = 2; // Position, Y-axis coordinate.
+  oneof Action {
+    PlaceAction place = 3; // Either place a stone ...
+    MoveAction move = 4; // ... or move a pile.
+  }
+}
+
+// A piece is some stone with an owner.
+message Piece {
+  PieceType type = 1; // Type of stone.
+  // Owner of the stone.
+  // Conveniently, false maps to 0 (index first player), true to 1 (index second player).
+  bool second_player_owned = 2;
+}
+
+// A pile of stones/pieces.
+message Pile {
+  // List of pieces on this pile.
+  // The lowest index is the stone at the bottom of the pile.
+  // The highest index is the stone at the top of the pile.
+  // May be empty, indicating no one owns this field.
+  repeated Piece pieces = 1;
+}
+
+// The GameState packet defines the current board state of the match.
+message GameState {
+  uint32 board_length = 1; // Board length of the quadratic game board. n.
+  // Remaining stones of both players.
+  // Index 0 is the first player, index 1 is the second player.
+  repeated uint32 remaining_stones = 2;
+  // Remaining capstones of both players.
+  // Index 0 is the first player, index 1 is the second player.
+  repeated uint32 remaining_capstones = 3;
+  // Flattened list of fields (both non-/empty piles) on the board, resulting in n² fields.
+  // The top left of the board corresponds to position (0|0).
+  // Fields are added row-wise. Index 0 is position (0|0).
+  //
+  // Example:
+  // - board_length := 3.
+  // - board := [Pile(0|0), Pile(1|0), Pile(2|0),
+  //             Pile(0|1), Pile(1|1), Pile(2|1),
+  //             Pile(0|2), Pile(1|2), Pile(2|2)]
+  repeated Pile board = 4;
+}

@@ -25,7 +25,7 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 3;
+    private static final int BOARD_LENGTH = 4;
     private static final int TIMEOUT = 200;
     private static final int NUM_GAMES = 1;
     public static int TREE_DEPTH = 5;
@@ -40,7 +40,6 @@ public class Main {
 
         //logger.setLevel(Level.ERROR);
 
-
         MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
         for (int i = 0; i < NUM_GAMES; i++) {
@@ -53,6 +52,7 @@ public class Main {
             gameLoop();
         }
     }
+
 
     private static void gameLoop() throws InterruptedException {
         while(matchIsRunning()) {
@@ -67,41 +67,40 @@ public class Main {
             Scanner sc= new Scanner(System.in);
             System.out.print("enter move m, p: ");
             String str= sc.nextLine();
-            while(!str.equals("p") || !str.equals("m")) {
-                String x = "";
-                while (!x.equals("")) {
-                    System.out.print("enter x: ");
-                    x = sc.nextLine();
-                }
-                String y = "";
-                while (!y.equals("")) {
-                    System.out.print("enter y: ");
-                    y = sc.nextLine();
-                }
-
-                if(str.equals("p")){
-                    String type = "";
-                    while(!type.equals("1") || !type.equals("2") || !type.equals("3")) {
-                        System.out.print("enter type 1=FLAT, 2=STANDING, 3=CAP: ");
-                        type = sc.nextLine();
-                    }
-                    playTurn(MoveGenerator.baki(x, y, type));
-                } else if (str.equals("m")) {
-
-                    String direction = "";
-                    while(!direction.equals("n") || !direction.equals("o") || !direction.equals("s") || !direction.equals("w")) {
-                        System.out.print("enter direction: n,o,s,w: ");
-                        direction = sc.nextLine();
-                    }
-
-                    String drops = "";
-                    while (!drops.equals("")) {
-                        System.out.print("enter drop: ");
-                        drops = sc.nextLine();
-                    }
-                    playTurn(MoveGenerator.tim(x, y, direction, drops));
-                }
+            String x = "";
+            while (x.equals("")) {
+                System.out.print("enter x: ");
+                x = sc.nextLine();
             }
+            String y = "";
+            while (y.equals("")) {
+                System.out.print("enter y: ");
+                y = sc.nextLine();
+            }
+
+            if(str.equals("p")){
+                String type = "";
+                while(type.equals("")) {
+                    System.out.print("enter type 1=FLAT, 2=STANDING, 3=CAP: ");
+                    type = sc.nextLine();
+                }
+                playTurn(MoveGenerator.baki(x, y, type));
+            } else if (str.equals("m")) {
+
+                String direction = "";
+                while(direction.equals("")) {
+                    System.out.print("enter direction: n,o,s,w: ");
+                    direction = sc.nextLine();
+                }
+
+                String drops = "";
+                while (drops.equals("")) {
+                    System.out.print("enter drop: ");
+                    drops = sc.nextLine();
+                }
+                playTurn(MoveGenerator.tim(x, y, direction, drops));
+            }
+
             state = client.getGameState().getTakGameState();
             writeToJSON(state);
         }

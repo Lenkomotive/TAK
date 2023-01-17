@@ -21,7 +21,7 @@ public class JSONWriter {
     public static String matchToken = "";
     private static final Logger logger = LogManager.getLogger(JSONWriter.class);
 
-    private static final String PATH = "src/main/java/json/games/game_state.json";
+    private static final String PATH = "src/main/java/json/json.games/game_state.json";
 
     public static void writeGameStateToJSON(Tak.GameState state, String path, boolean beginningPlayer) {
         PieceColor ourColor = beginningPlayer? PieceColor.WHITE:PieceColor.BLACK;
