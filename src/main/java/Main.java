@@ -10,6 +10,7 @@ import tak.Tak;
 import utils.PieceColor;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 import static java.lang.Thread.sleep;
 
@@ -24,10 +25,10 @@ public class Main {
     private static int turnCount;
 
     // Game parameter
-    private static final int BOARD_LENGTH = 5;
-    private static final int TIMEOUT = 20;
+    private static final int BOARD_LENGTH = 3;
+    private static final int TIMEOUT = 200;
     private static final int NUM_GAMES = 1;
-    public static int TREE_DEPTH = 3;
+    public static int TREE_DEPTH = 5;
     private static String OPPONENT = "";
 
     private static Client client;
@@ -38,6 +39,7 @@ public class Main {
         BasicConfigurator.configure(); //log4j
 
         //logger.setLevel(Level.ERROR);
+
 
         MoveGenerator.TREE_DEPTH = TREE_DEPTH;
         client = new Client();
@@ -53,24 +55,47 @@ public class Main {
     }
 
     private static void gameLoop() throws InterruptedException {
-        boolean firstMove = true;
         while(matchIsRunning()) {
             if(itIsOpponentsTurn()) {
                 logger.info("Opponents turn, let's wait...");
                 sleep(SLEEP_MS);
                 continue;
             }
-            Tak.GameTurn turn = null;
             Tak.GameState state = client.getGameState().getTakGameState();
             writeToJSON(state);
-            if(firstMove) {
-                turn = MoveGenerator.playFirstMove(state);
-                firstMove = false;
-            } else {
-                turn =   MoveGenerator.playSmartMove(state);
-                //turn = MoveGenerator.playValidPlaceMove(state);
+
+            Scanner sc= new Scanner(System.in);
+            System.out.print("enter move m, p: ");
+            String str= sc.nextLine();
+            while(!str.equals("p") || !str.equals("m")) {
+                if(str.equals("p")){
+                    System.out.print("enter x: ");
+                    String x = sc.nextLine();
+                    System.out.print("enter y: ");
+                    String y = sc.nextLine();
+                    String type = "";
+                    while(!type.equals("1") || !type.equals("2") || !type.equals("3")) {
+                        System.out.print("enter type 1=FLAT, 2=STANDING, 3=CAP: ");
+                        type = sc.nextLine();
+                    }
+                    playTurn(MoveGenerator.baki(x, y, type));
+                } else if (str.equals("m")) {
+                    System.out.print("enter x: ");
+                    String x = sc.nextLine();
+                    System.out.print("enter y: ");
+                    String y = sc.nextLine();
+                    String direction = "";
+                    while(!direction.equals("n") || !direction.equals("o") || !direction.equals("s") || !direction.equals("w")) {
+                        System.out.print("enter direction: n,o,s,w: ");
+                        direction = sc.nextLine();
+                    }
+                    System.out.print("enter drop: ");
+                    String drops = sc.nextLine();
+                    playTurn(MoveGenerator.tim(x, y, direction, drops));
+                }
             }
-            playTurn(turn);
+            state = client.getGameState().getTakGameState();
+            writeToJSON(state);
         }
         Tak.GameState state = client.getGameState().getTakGameState();
         writeToJSON(state);

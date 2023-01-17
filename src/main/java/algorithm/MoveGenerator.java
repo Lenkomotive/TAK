@@ -54,7 +54,7 @@ public final class MoveGenerator {
         // opponent has winning move, play that node as our color instead of opponents
         if(opponentWinningMove != null && opponentWinningMove.gameTurn.getActionCase() == Tak.GameTurn.ActionCase.PLACE) {
             logger.info("OPPONENT WINNING MOVE DETECTED");
-            Tak.PlaceAction wallPlaceAction = createPlaceAction(Tak.PieceType.STANDING_STONE);
+            Tak.PlaceAction wallPlaceAction = createPlaceAction(Tak.PieceType.FLAT_STONE);
             int i = translateCoordinateToIndex(state.getBoardLength(), new Coordinates(opponentWinningMove.gameTurn.getX(),opponentWinningMove.gameTurn.getY()));
             return createPlaceGameTurn(state.getBoardLength(), i, wallPlaceAction);
         }
@@ -548,6 +548,48 @@ public final class MoveGenerator {
         }
         Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(Tak.PieceType.FLAT_STONE).build();
         return createPlaceGameTurn(state.getBoardLength(), index, placeAction);
+    }
+
+    public static Tak.GameTurn baki(String x, String y, String type) {
+        Tak.PieceType pieceType = null;
+        switch (type) {
+            case "1" -> pieceType = Tak.PieceType.FLAT_STONE;
+            case "2" -> pieceType = Tak.PieceType.STANDING_STONE;
+            case "3" -> pieceType = Tak.PieceType.CAPSTONE;
+        }
+        Tak.PlaceAction placeAction = Tak.PlaceAction.newBuilder().setPiece(pieceType).build();
+        return Tak.GameTurn.newBuilder()
+                .setX(Integer.parseInt(x))
+                .setY(Integer.parseInt(y))
+                .setPlace(placeAction)
+                .build();
+    }
+
+    public static Tak.GameTurn tim(String x, String y, String direction, String drops) {
+        Tak.Direction dir = null;
+        switch (direction) {
+            case "n" -> dir = Tak.Direction.NORTH;
+            case "o" -> dir = Tak.Direction.EAST;
+            case "s" -> dir = Tak.Direction.SOUTH;
+            case "w" -> dir = Tak.Direction.WEST;
+        }
+
+        List<Integer> dr = new ArrayList<>();
+        for (int i = 0; i < drops.length(); i++) {
+            dr.add(Integer.parseInt(String.valueOf(drops.charAt(i))));
+        }
+
+        Tak.MoveAction moveAction = Tak.MoveAction.newBuilder()
+                .addAllDrops(dr)
+                .setDirection(dir)
+                .build();
+
+        System.out.println("move: " + dir + drops);
+        return Tak.GameTurn.newBuilder().
+                setX(Integer.parseInt(x)).
+                setY(Integer.parseInt(y))
+                .setMove(moveAction)
+                .build();
     }
 }
 
