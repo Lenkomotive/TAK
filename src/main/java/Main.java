@@ -68,11 +68,18 @@ public class Main {
             System.out.print("enter move m, p: ");
             String str= sc.nextLine();
             while(!str.equals("p") || !str.equals("m")) {
-                if(str.equals("p")){
+                String x = "";
+                while (!x.equals("")) {
                     System.out.print("enter x: ");
-                    String x = sc.nextLine();
+                    x = sc.nextLine();
+                }
+                String y = "";
+                while (!y.equals("")) {
                     System.out.print("enter y: ");
-                    String y = sc.nextLine();
+                    y = sc.nextLine();
+                }
+
+                if(str.equals("p")){
                     String type = "";
                     while(!type.equals("1") || !type.equals("2") || !type.equals("3")) {
                         System.out.print("enter type 1=FLAT, 2=STANDING, 3=CAP: ");
@@ -80,17 +87,18 @@ public class Main {
                     }
                     playTurn(MoveGenerator.baki(x, y, type));
                 } else if (str.equals("m")) {
-                    System.out.print("enter x: ");
-                    String x = sc.nextLine();
-                    System.out.print("enter y: ");
-                    String y = sc.nextLine();
+
                     String direction = "";
                     while(!direction.equals("n") || !direction.equals("o") || !direction.equals("s") || !direction.equals("w")) {
                         System.out.print("enter direction: n,o,s,w: ");
                         direction = sc.nextLine();
                     }
-                    System.out.print("enter drop: ");
-                    String drops = sc.nextLine();
+
+                    String drops = "";
+                    while (!drops.equals("")) {
+                        System.out.print("enter drop: ");
+                        drops = sc.nextLine();
+                    }
                     playTurn(MoveGenerator.tim(x, y, direction, drops));
                 }
             }

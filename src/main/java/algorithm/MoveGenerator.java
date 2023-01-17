@@ -574,17 +574,16 @@ public final class MoveGenerator {
             case "w" -> dir = Tak.Direction.WEST;
         }
 
-        List<Integer> dr = new ArrayList<>();
+        List<Integer> drop = new ArrayList<>();
         for (int i = 0; i < drops.length(); i++) {
-            dr.add(Integer.parseInt(String.valueOf(drops.charAt(i))));
+            drop.add(Integer.parseInt(String.valueOf(drops.charAt(i))));
         }
 
         Tak.MoveAction moveAction = Tak.MoveAction.newBuilder()
-                .addAllDrops(dr)
+                .addAllDrops(drop)
                 .setDirection(dir)
                 .build();
 
-        System.out.println("move: " + dir + drops);
         return Tak.GameTurn.newBuilder().
                 setX(Integer.parseInt(x)).
                 setY(Integer.parseInt(y))
